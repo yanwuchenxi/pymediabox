@@ -2,8 +2,6 @@ package com.pymediabox.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -63,7 +61,7 @@ public class ApiSourceManager {
 
     /** 添加自定义源 */
     public boolean addSource(String name, String url) {
-        if (name == null || name.isEmpty() || url == null || !Uri.parse(url).isNetworkUri())
+        if (name == null || name.isEmpty() || url == null || !url.startsWith("http"))
             return false;
         String key = "s" + System.currentTimeMillis() % 100000;
         try {

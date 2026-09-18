@@ -46,6 +46,6 @@ public class ResumeManager {
     }
 
     private static int hash(String s) {
-        return Integer.abs(s.hashCode() % 1000000);
+        return Math.abs(s.hashCode() % 1000000);
     }
 }
