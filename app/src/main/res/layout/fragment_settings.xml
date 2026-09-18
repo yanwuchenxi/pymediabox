@@ -2,7 +2,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -10,6 +11,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- 默认播放源 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,7 +28,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="设置"
+                    android:text="播放"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -35,15 +37,22 @@
                     android:id="@+id/switch_keep_screen"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:paddingStart="0dp"
-                    android:text="@string/lbl_keep_screen"
+                    android:text="保持屏幕常亮"
+                    android:textColor="@color/white" />
+
+                <Switch
+                    android:id="@+id/switch_resume"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="断点续播（记住上次进度）"
                     android:textColor="@color/white" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:text="默认播放源"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
@@ -58,6 +67,8 @@
                         android:id="@+id/et_default_url"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
+                        android:inputType="textUri"
+                        android:singleLine="true"
                         android:textColor="@color/white"
                         android:textColorHint="@color/text_secondary" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -73,6 +84,79 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- API 源管理 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="API 源"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="TVBox 式 JSON 接口源，首页下拉分类即来自这里"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:hint="接口 URL"
+                        app:boxStrokeColor="@color/accent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_new_source_url"
+                            android:layout_width="match_parent"
+                            android:layout_height="44dp"
+                            android:inputType="textUri"
+                            android:singleLine="true"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/text_secondary" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_add_source"
+                        android:layout_width="80dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="8dp"
+                        android:text="＋ 添加"
+                        android:backgroundTint="@color/accent"
+                        android:textColor="@color/black" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_sources"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 本地媒体 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -111,6 +195,7 @@
                     android:text="视频请放到 /sdcard/Android/data/com.pymediabox.app/files/Movies"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_clear_history"
                     android:layout_width="match_parent"
@@ -122,6 +207,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- 关于 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

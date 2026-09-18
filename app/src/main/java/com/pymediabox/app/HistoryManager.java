@@ -105,6 +105,11 @@ public class HistoryManager {
         return list;
     }
 
+    /** 清除全部历史与收藏（保留进度由 ResumeManager 处理） */
+    public void clearAll() {
+        prefs.edit().clear().apply();
+    }
+
     public static class HistoryItem {
         public final String title, url, type, time;
         HistoryItem(String t, String u, String ty, String tm) {

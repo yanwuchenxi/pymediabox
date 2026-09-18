@@ -1,7 +1,9 @@
 package com.pymediabox.app;
 
-import android.graphics.Color;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,8 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Locale;
-import com.google.android.material.button.MaterialButton;
 
 public class PlayerActivity extends AppCompatActivity {
 
@@ -34,15 +36,19 @@ public class PlayerActivity extends AppCompatActivity {
     private final SimpleDateFormat fmt = new SimpleDateFormat("mm:ss", Locale.US);
 
     private HistoryManager history;
-    private MaterialButton btnFavorite;
-    private MaterialButton btnNext;
+    private ResumeManager resume;
+    private MaterialButton btnFavorite, btnNext;
+    private String curUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         history = new HistoryManager(this);
+        resume = new ResumeManager(this);
+
         String url = getIntent().getStringExtra("url");
         String title = getIntent().getStringExtra("title");
+        curUrl = url;
         if (url != null && !url.isEmpty()) {
             history.addHistory(title != null ? title : url, url, "在线");
         }
@@ -54,6 +60,9 @@ public class PlayerActivity extends AppCompatActivity {
         tvTitle.setTextSize(14);
         tvTitle.setPadding(16, 12, 16, 12);
         tvTitle.setBackgroundColor(0xCC0D0F1A);
+        if (url != null && resume.load(url) > 0) {
+            tvTitle.append("（可续播）");
+        }
 
         // 进度条
         progress = new SeekBar(this);
@@ -95,47 +104,25 @@ public class PlayerActivity extends AppCompatActivity {
         row.addView(btnFullscreen, fl);
 
         btnFavorite = new MaterialButton(this);
-        btnFavorite.setText("☆ 收藏");
         btnFavorite.setAllCaps(false);
         btnFavorite.setElevation(0);
         final String finalUrl = url;
-        final String finalTitle = title != null ? title : url;
         btnFavorite.setOnClickListener(v -> {
             boolean added = history.toggleFavorite(finalUrl);
             btnFavorite.setText(added ? "★ 已收藏" : "☆ 收藏");
         });
         btnFavorite.setText(history.isFavorite(finalUrl) ? "★ 已收藏" : "☆ 收藏");
 
-        bottomBar = new LinearLayout(this);
-        bottomBar.setOrientation(LinearLayout.VERTICAL);
-        bottomBar.setPadding(16, 12, 16, 16);
-        bottomBar.setBackgroundColor(0x330D0F1A);
         btnNext = new MaterialButton(this);
         btnNext.setText("⏭ 下一个");
         btnNext.setAllCaps(false);
         btnNext.setElevation(0);
-        btnNext.setOnClickListener(v -> {
-            // 从播放历史取下一条
-            java.util.List<HistoryManager.HistoryItem> h = history.getHistory();
-            int idx = -1;
-            for (int i = 0; i < h.size(); i++)
-                if (h.get(i).url.equals(finalUrl)) { idx = i; break; }
-            if (idx < h.size() - 1) {
-                HistoryManager.HistoryItem next = h.get(idx + 1);
-                Intent i = new Intent(this, PlayerActivity.class);
-                i.putExtra("url", next.url);
-                i.putExtra("title", next.title);
-                startActivity(i);
-            } else if (!h.isEmpty()) {
-                HistoryManager.HistoryItem next = h.get(0);
-                Intent i = new Intent(this, PlayerActivity.class);
-                i.putExtra("url", next.url);
-                i.putExtra("title", next.title);
-                startActivity(i);
-            } else {
-                android.widget.Toast.makeText(this, "没有更多视频", android.widget.Toast.LENGTH_SHORT).show();
-            }
-        });
+        btnNext.setOnClickListener(v -> nextInHistory());
+
+        bottomBar = new LinearLayout(this);
+        bottomBar.setOrientation(LinearLayout.VERTICAL);
+        bottomBar.setPadding(16, 12, 16, 16);
+        bottomBar.setBackgroundColor(0x330D0F1A);
 
         LinearLayout favRow = new LinearLayout(this);
         favRow.setGravity(android.view.Gravity.END);
@@ -162,6 +149,7 @@ public class PlayerActivity extends AppCompatActivity {
         btnPlayPause.setOnClickListener(v -> togglePlay());
         btnReplay.setOnClickListener(v -> {
             if (videoView != null) {
+                resume.clear(curUrl);
                 videoView.seekTo(0);
                 videoView.start();
                 isPlaying = true;
@@ -188,9 +176,20 @@ public class PlayerActivity extends AppCompatActivity {
             return;
         }
         try {
+            // 断点续播（设置中开启时）
+            SharedPreferences sp = getSharedPreferences("pymediabox", Context.MODE_PRIVATE);
+            int resumePos = 0;
+            if (sp.getBoolean("resume_enabled", true)) {
+                resumePos = resume.load(url);
+                if (resumePos > 0)
+                    Toast.makeText(this, "从 " + fmt.format(resumePos) + " 续播",
+                            Toast.LENGTH_SHORT).show();
+            }
+            final int startPos = resumePos;
             videoView.setVideoURI(Uri.parse(url));
             videoView.setOnPreparedListener(mp -> {
                 durationMs = mp.getDuration();
+                if (startPos > 0 && startPos < durationMs) mp.seekTo(startPos);
                 mp.start();
                 isPlaying = true;
                 btnPlayPause.setText("暂停");
@@ -199,6 +198,7 @@ public class PlayerActivity extends AppCompatActivity {
             videoView.setOnCompletionListener(mp -> {
                 btnPlayPause.setText("重播");
                 isPlaying = false;
+                resume.clear(curUrl);
             });
             videoView.setOnErrorListener((mp, what, extra) -> {
                 Toast.makeText(this, "播放失败 what=" + what, Toast.LENGTH_SHORT).show();
@@ -209,18 +209,43 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    private void nextInHistory() {
+        List<HistoryManager.HistoryItem> h = history.getHistory();
+        int idx = -1;
+        for (int i = 0; i < h.size(); i++)
+            if (h.get(i).url.equals(curUrl)) { idx = i; break; }
+        HistoryManager.HistoryItem next;
+        if (idx >= 0 && idx < h.size() - 1) next = h.get(idx + 1);
+        else if (!h.isEmpty()) next = h.get(0);
+        else {
+            Toast.makeText(this, "没有更多视频", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent i = new Intent(this, PlayerActivity.class);
+        i.putExtra("url", next.url);
+        i.putExtra("title", next.title);
+        startActivity(i);
+    }
+
     private void togglePlay() {
         if (videoView == null) return;
         if (isPlaying) {
             videoView.pause();
             isPlaying = false;
             btnPlayPause.setText("继续");
+            // 暂停时保存断点
+            saveResume();
         } else {
             videoView.start();
             isPlaying = true;
             btnPlayPause.setText("暂停");
             startProgress();
         }
+    }
+
+    private void saveResume() {
+        if (videoView != null && durationMs > 0)
+            resume.save(curUrl, videoView.getCurrentPosition(), durationMs);
     }
 
     private void toggleFullscreen() {
@@ -258,10 +283,14 @@ public class PlayerActivity extends AppCompatActivity {
     @Override protected void onPause() {
         super.onPause();
         handler.removeCallbacks(progressTask);
+        if (isPlaying) saveResume();
     }
 
     @Override protected void onDestroy() {
-        if (videoView != null) videoView.stopPlayback();
+        if (videoView != null) {
+            saveResume();
+            videoView.stopPlayback();
+        }
         super.onDestroy();
     }
 }

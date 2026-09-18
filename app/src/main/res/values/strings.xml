@@ -12,4 +12,26 @@
     <string name="lbl_keep_screen">保持屏幕常亮</string>
     <string name="lbl_about">关于</string>
     <string name="about_body">PyMediaBox：参照 TVBoxOS + Chaquopy 设计，\n支持 Python 爬虫解析源与影音播放。</string>
+
+    <!-- API 源管理 -->
+    <string name="lbl_api_sources">API 源</string>
+    <string name="src_builtin">内置演示源</string>
+    <string name="src_add_hint">接口 URL（TVBox JSON 格式）</string>
+    <string name="btn_add_source">＋ 添加源</string>
+    <string name="btn_remove">删除</string>
+
+    <!-- 队列页 -->
+    <string name="queue_history">播放历史</string>
+    <string name="queue_fav">收藏</string>
+
+    <!-- 播放页 -->
+    <string name="btn_favorite">收藏</string>
+    <string name="btn_favorited">已收藏</string>
+    <string name="btn_next">下一个</string>
+    <string name="btn_fullscreen">全屏</string>
+    <string name="btn_exit_fullscreen">退出全屏</string>
+
+    <!-- 设置页 -->
+    <string name="lbl_resume">断点续播</string>
+    <string name="btn_clear_history">清除播放历史与收藏</string>
 </resources>

@@ -1,7 +1,6 @@
 package com.pymediabox.app;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,18 +8,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.List;
+
 public class SettingsFragment extends Fragment {
 
     private SharedPreferences prefs;
+    private ApiSourceManager sourceManager;
+    private ResumeManager resumeManager;
+    private RecyclerView recyclerSources;
+    private SourceAdapter adapter;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup c, @Nullable Bundle s) {
@@ -29,6 +37,8 @@ public class SettingsFragment extends Fragment {
 
     @Override public void onViewCreated(@NonNull View v, @Nullable Bundle s) {
         prefs = getContext().getSharedPreferences("pymediabox", Context.MODE_PRIVATE);
+        sourceManager = new ApiSourceManager(getContext());
+        resumeManager = new ResumeManager(getContext());
 
         // 默认播放源
         TextInputEditText etUrl = v.findViewById(R.id.et_default_url);
@@ -42,9 +52,9 @@ public class SettingsFragment extends Fragment {
         });
 
         // 保持屏幕常亮
-        Switch sw = v.findViewById(R.id.switch_keep_screen);
-        sw.setChecked(prefs.getBoolean("keep_screen", false));
-        sw.setOnCheckedChangeListener((b, checked) -> {
+        Switch swKeep = v.findViewById(R.id.switch_keep_screen);
+        swKeep.setChecked(prefs.getBoolean("keep_screen", false));
+        swKeep.setOnCheckedChangeListener((b, checked) -> {
             prefs.edit().putBoolean("keep_screen", checked).apply();
             if (getActivity() == null) return;
             if (checked)
@@ -52,8 +62,35 @@ public class SettingsFragment extends Fragment {
             else
                 getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         });
-        if (sw.isChecked())
+        if (swKeep.isChecked())
             getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // 断点续播开关
+        Switch swResume = v.findViewById(R.id.switch_resume);
+        swResume.setChecked(prefs.getBoolean("resume_enabled", true));
+        swResume.setOnCheckedChangeListener((b, checked) ->
+                prefs.edit().putBoolean("resume_enabled", checked).apply());
+
+        // API 源添加
+        TextInputEditText etSrc = v.findViewById(R.id.et_new_source_url);
+        v.findViewById(R.id.btn_add_source).setOnClickListener(x -> {
+            String u = etSrc.getText().toString().trim();
+            if (u.isEmpty()) {
+                Toast.makeText(getContext(), "请输入接口 URL", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (sourceManager.addSource("API 源", u)) {
+                Toast.makeText(getContext(), "已添加 API 源", Toast.LENGTH_SHORT).show();
+                etSrc.setText("");
+                refreshSources();
+            } else {
+                Toast.makeText(getContext(), "URL 无效", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        recyclerSources = v.findViewById(R.id.recycler_sources);
+        recyclerSources.setLayoutManager(new LinearLayoutManager(getContext()));
+        refreshSources();
 
         // 本地扫描
         v.findViewById(R.id.btn_scan_local).setOnClickListener(x ->
@@ -61,9 +98,60 @@ public class SettingsFragment extends Fragment {
 
         // 清除历史/收藏
         v.findViewById(R.id.btn_clear_history).setOnClickListener(x -> {
-            SharedPreferences h = getContext().getSharedPreferences("pymediabox_history", Context.MODE_PRIVATE);
-            h.edit().clear().apply();
-            Toast.makeText(getContext(), "播放历史与收藏已清除", Toast.LENGTH_SHORT).show();
+            new HistoryManager(getContext()).clearAll();
+            resumeManager.clearAll();
+            Toast.makeText(getContext(), "播放历史、收藏与进度已清除", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void refreshSources() {
+        List<ApiSourceManager.Source> items = sourceManager.sources();
+        if (adapter == null) {
+            adapter = new SourceAdapter(items);
+            recyclerSources.setAdapter(adapter);
+        } else {
+            adapter.data = items;
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.VH> {
+        List<ApiSourceManager.Source> data;
+
+        SourceAdapter(List<ApiSourceManager.Source> d) { this.data = d; }
+
+        @NonNull @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
+            return new VH(LayoutInflater.from(p.getContext()).inflate(R.layout.item_source, p, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int pos) {
+            ApiSourceManager.Source s = data.get(pos);
+            h.name.setText(s.name);
+            h.url.setText(s.url);
+            boolean builtin = ApiSourceManager.BUILTIN_KEY.equals(s.key);
+            h.badge.setText(builtin ? "内置" : "自定义");
+            h.del.setVisibility(builtin ? View.GONE : View.VISIBLE);
+            h.del.setOnClickListener(b -> {
+                sourceManager.removeSource(s.key);
+                refreshSources();
+                Toast.makeText(getContext(), "已删除", Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        @Override public int getItemCount() { return data.size(); }
+
+        class VH extends RecyclerView.ViewHolder {
+            TextView name, url, badge;
+            MaterialButton del;
+            VH(View v) {
+                super(v);
+                name = v.findViewById(R.id.tv_source_name);
+                url = v.findViewById(R.id.tv_source_url);
+                badge = v.findViewById(R.id.tv_source_badge);
+                del = v.findViewById(R.id.btn_source_delete);
+            }
+        }
     }
 }

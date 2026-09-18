@@ -114,6 +114,15 @@ public class HomeFragment extends Fragment {
                 "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4", "在线"));
         items.add(new Item("在线示例 · Sintel",
                 "https://media.w3.org/2010/05/sintel/trailer.mp4", "在线"));
+        // API 源分类（TVBox 式，内置演示源）
+        ApiSourceManager am = new ApiSourceManager(getContext());
+        for (ApiSourceManager.Source src : am.sources()) {
+            java.util.List<String> classes = am.homeClasses(src);
+            if (classes == null) continue;
+            for (String c : classes) {
+                items.add(new Item(c + " · 分类", "", "API:" + src.name));
+            }
+        }
         // 本地媒体
         addLocalVideos(items);
         // 空状态
@@ -156,7 +165,15 @@ public class HomeFragment extends Fragment {
             h.title.setText(it.title);
             h.link.setText(it.link);
             h.type.setText(it.type);
-            h.itemView.setOnClickListener(v -> openUrl(getContext(), it.link, it.title));
+            h.itemView.setOnClickListener(v -> {
+                if (it.link == null || it.link.isEmpty()) {
+                    android.widget.Toast.makeText(getContext(),
+                            "「" + it.type + "」分类解析需要配置对应 API 源",
+                            android.widget.Toast.LENGTH_SHORT).show();
+                } else {
+                    openUrl(getContext(), it.link, it.title);
+                }
+            });
         }
         @Override public int getItemCount() { return data.size(); }
 
