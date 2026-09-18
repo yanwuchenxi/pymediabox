@@ -113,7 +113,8 @@ public class SettingsFragment extends Fragment {
                     v.findViewById(R.id.et_param);
             String param = etParam.getText().toString().trim();
             String label = spiderLabel(spiderMethod) + (param.isEmpty() ? "" : " " + param);
-            v.findViewById(R.id.tv_result).setText(runSpider(spiderMethod, param));
+            ((android.widget.TextView) v.findViewById(R.id.tv_result))
+                    .setText(runSpider(spiderMethod, param));
             addSpiderHistory(label);
         });
 
