@@ -128,6 +128,36 @@ def page_home():
     top = draw_top(d, 0)
     y = top + 24
 
+    # 视频区（黑底 + 信息卡）
+    d.rectangle((0, y, W, y + 300), fill=(0, 0, 0))
+    # 信息卡
+    rrect(d, (0, y + 210, W, y + 300), 0, CARD2)
+    # 频道图标
+    rrect(d, (28, y + 224, 100, y + 296), 14, CARD2)
+    d.text((52, y + 248), "📺", font=f_card_s, fill=ACCENT)
+    # 名称
+    d.text((118, y + 226), "频道名称", font=f_card_s, fill=WHITE)
+    d.text((118, y + 262), "收藏频道", font=f_small, fill=SECONDARY)
+    # 中间预告
+    pw = text_w("暂时没有播放预告", f_small)
+    d.text((W//2 - pw//2, y + 226), "暂时没有播放预告", font=f_small, fill=WHITE)
+    d.text((W//2 - pw//2, y + 262), "暂时没有播放预告", font=f_small, fill=SECONDARY)
+    # 集数 + 更多
+    d.text((W - 90, y + 226), "1", font=f_card_t, fill=WHITE)
+    d.text((W - 60, y + 220), "⋮", font=f_card_t, fill=WHITE)
+    y += 300 + 16
+
+    # 收藏频道横向卡片
+    chs = [("演示", ACCENT), ("央视", CARD2), ("电影", CARD2)]
+    cx = 24
+    for lab, c in chs:
+        rrect(d, (cx, y, cx + 120, y + 150), 14, CARD)
+        rrect(d, (cx, y, cx + 120, y + 100), 14, c)
+        d.text((cx + 44, y + 40), lab[0], font=f_card_t, fill=ACCENT)
+        d.text((cx + 12, y + 110), lab, font=f_small, fill=WHITE)
+        cx += 132
+    y += 150 + 16
+
     # 搜索栏
     rrect(d, (40, y, W - 40, y + 64), 16, CARD, outline=CARD2, width=2)
     icon_search(d, 80, y + 32, r=18, color=SECONDARY)
@@ -142,7 +172,7 @@ def page_home():
     y += 56 + 16
 
     # 分段筛选
-    seg_row(d, y, ["推荐", "历史", "收藏"], 0)
+    seg_row(d, y, ["推荐", "观看历史", "影视收藏"], 0)
     y += 56 + 24
 
     # 列表
@@ -253,12 +283,64 @@ def page_settings():
                fill=ACCENT if i in (0, 6) else SECONDARY)
     y += c3h + 20
 
-    # 卡片4 数据管理
-    c4h = 160
+    # 卡片4 播放器配置
+    c4h = 560
     card(d, 40, y, W - 80, c4h)
+    yy = card_title(d, 40, y, "播放器设置")
+    # 内核
+    d.text((70, yy), "内核", font=f_small, fill=SECONDARY)
+    yy += 34
+    kw = (W - 140 - 4*8) // 3
+    klabels = ["系统", "EXO硬解", "EXO软解"]
+    for i, kl in enumerate(klabels):
+        kx = 70 + i * (kw + 8)
+        sel = (i == 0)
+        rrect(d, (kx, yy, kx + kw, yy + 56), 12, ACCENT if sel else CARD2,
+              outline=None if sel else CARD2, width=0 if sel else 2)
+        d.text((kx + kw//2 - text_w(kl, f_btn)//2, yy + 14), kl, font=f_btn,
+               fill=BLACK if sel else WHITE)
+    yy += 56 + 20
+    # 画面缩放
+    d.text((70, yy), "画面缩放", font=f_small, fill=SECONDARY)
+    yy += 34
+    scales = ["默认", "16:9", "4:3", "填充", "原始", "剪裁"]
+    sw_ = (W - 140 - 5*8) // 6
+    for i, sc in enumerate(scales):
+        sx = 70 + i * (sw_ + 8)
+        sel = (i == 0)
+        rrect(d, (sx, yy, sx + sw_, yy + 50), 12, ACCENT if sel else CARD2)
+        d.text((sx + sw_//2 - text_w(sc, f_small)//2, yy + 14), sc, font=f_small,
+               fill=BLACK if sel else SECONDARY)
+    yy += 50 + 20
+    # 超时换源
+    d.text((70, yy), "超时换源（秒）", font=f_small, fill=SECONDARY)
+    yy += 34
+    touts = ["5", "10", "20", "30"]
+    tw_ = (W - 140 - 3*8) // 4
+    for i, t in enumerate(touts):
+        tx = 70 + i * (tw_ + 8)
+        sel = (i == 3)
+        rrect(d, (tx, yy, tx + tw_, yy + 50), 12, ACCENT if sel else CARD2)
+        d.text((tx + tw_//2 - text_w(t, f_small)//2, yy + 14), t, font=f_small,
+               fill=BLACK if sel else SECONDARY)
+    yy += 50 + 20
+    # 高级
+    d.text((70, yy), "搜索线程", font=f_small, fill=SECONDARY)
+    yy += 34
+    rrect(d, (70, yy, W//2, yy + 56), 12, CARD2, outline=ACCENT_DIM, width=2)
+    d.text((94, yy + 18), "8", font=f_card_s, fill=WHITE)
+    btn(d, W//2 + 20, yy, W - 140 - (W//2 + 20), "保存", h=56)
+    yy += 56 + 16
+    rrect(d, (70, yy, W - 70, yy + 50), 12, CARD2)
+    d.text((W//2 - text_w("恢复默认", f_btn)//2, yy + 12), "恢复默认", font=f_btn, fill=WHITE)
+    y += c4h + 20
+
+    # 卡片5 数据管理
+    c5h = 160
+    card(d, 40, y, W - 80, c5h)
     yy = card_title(d, 40, y, "数据管理")
     btn(d, 70, yy, W - 140, "清除播放历史 / 收藏 / 断点", primary=False)
-    y += c4h + 20
+    y += c5h + 20
 
     img.save(os.path.join(OUT, "02_settings.png"))
 
