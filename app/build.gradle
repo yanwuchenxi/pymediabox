@@ -14,19 +14,6 @@ android {
         versionCode 1
         versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        // Chaquopy DSL 在 android { defaultConfig { ... } } 内部
-        python {
-            version = '3.10'
-            pip {
-                install 'requests'
-                install 'beautifulsoup4'
-                install 'lxml'
-                install 'pycryptodome'
-                install 'cachetools'
-                install 'pyquery'
-            }
-        }
     }
 
     signingConfigs {
@@ -52,6 +39,35 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Chaquopy 15.0.1: 项目级 'chaquopy' 扩展 + 顶层 'pip' DSL
+// 将 'python' 方法注册到 android.defaultConfig 的 ExtensionAware，
+// 避免与 AGP 冲突，同时保证 pip 包可被声明。
+gradle.projectsEvaluated {
+    def android = project.extensions.findByName('android')
+    def defaultConfig = android.defaultConfig
+    defaultConfig.extensions.add('python', project.extensions.findByName('chaquopy').defaultConfig)
+}
+
+def appAndroid = project.extensions.findByName('android')
+
+python {
+    version = '3.10'
+}
+
+// pip 包通过项目级扩展安装
+// chaquopy 15.0.1 的项目级 DSL 是 'chaquopy'
+chaquopy {
+    version = '3.10'
+    pip {
+        install 'requests'
+        install 'beautifulsoup4'
+        install 'lxml'
+        install 'pycryptodome'
+        install 'cachetools'
+        install 'pyquery'
     }
 }
 
