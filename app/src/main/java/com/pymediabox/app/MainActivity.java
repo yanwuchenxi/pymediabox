@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_home));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_spider));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_queue));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_settings));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -45,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
         Fragment f;
         switch (pos) {
             case 1: f = new SpiderFragment(); break;
-            case 2: f = new SettingsFragment(); break;
+            case 2: f = new QueueFragment(); break;
+            case 3: f = new SettingsFragment(); break;
             default: f = new HomeFragment(); break;
         }
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();

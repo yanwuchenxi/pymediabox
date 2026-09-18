@@ -3,6 +3,7 @@
     <string name="app_name">PyMediaBox</string>
     <string name="tab_home">首页</string>
     <string name="tab_spider">爬虫</string>
+    <string name="tab_queue">队列</string>
     <string name="tab_settings">设置</string>
     <string name="hint_empty">暂无数据</string>
     <string name="btn_reload">刷新</string>

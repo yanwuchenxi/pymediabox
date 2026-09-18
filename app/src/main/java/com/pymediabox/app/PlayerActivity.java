@@ -17,6 +17,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import com.google.android.material.button.MaterialButton;
 
 public class PlayerActivity extends AppCompatActivity {
 
@@ -31,11 +32,18 @@ public class PlayerActivity extends AppCompatActivity {
     private int durationMs = 0;
     private final SimpleDateFormat fmt = new SimpleDateFormat("mm:ss", Locale.US);
 
+    private HistoryManager history;
+    private MaterialButton btnFavorite;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        history = new HistoryManager(this);
         String url = getIntent().getStringExtra("url");
         String title = getIntent().getStringExtra("title");
+        if (url != null && !url.isEmpty()) {
+            history.addHistory(title != null ? title : url, url, "在线");
+        }
 
         // 标题栏
         tvTitle = new TextView(this);
@@ -84,10 +92,27 @@ public class PlayerActivity extends AppCompatActivity {
         fl.setMargins(8, 0, 0, 0);
         row.addView(btnFullscreen, fl);
 
+        btnFavorite = new MaterialButton(this);
+        btnFavorite.setText("☆ 收藏");
+        btnFavorite.setAllCaps(false);
+        btnFavorite.setElevation(0);
+        final String finalUrl = url;
+        final String finalTitle = title != null ? title : url;
+        btnFavorite.setOnClickListener(v -> {
+            boolean added = history.toggleFavorite(finalUrl);
+            btnFavorite.setText(added ? "★ 已收藏" : "☆ 收藏");
+        });
+        btnFavorite.setText(history.isFavorite(finalUrl) ? "★ 已收藏" : "☆ 收藏");
+
         bottomBar = new LinearLayout(this);
         bottomBar.setOrientation(LinearLayout.VERTICAL);
         bottomBar.setPadding(16, 12, 16, 16);
         bottomBar.setBackgroundColor(0x330D0F1A);
+        LinearLayout favRow = new LinearLayout(this);
+        favRow.setGravity(android.view.Gravity.END);
+        favRow.setPadding(0, 0, 16, 0);
+        favRow.addView(btnFavorite, new LinearLayout.LayoutParams(-2, -2));
+        bottomBar.addView(favRow, new LinearLayout.LayoutParams(-1, -2));
         bottomBar.addView(progress, new LinearLayout.LayoutParams(-1, -2));
         bottomBar.addView(row);
 

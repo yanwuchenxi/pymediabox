@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- 切换按钮 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_toggle_queue"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_margin="12dp"
+        android:text="显示收藏"
+        android:backgroundTint="@color/accent"
+        android:textColor="@color/black" />
+
+    <!-- 空状态 -->
+    <TextView
+        android:id="@+id/tv_empty_queue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:gravity="center"
+        android:text="暂无播放历史"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_queue"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
+</LinearLayout>
