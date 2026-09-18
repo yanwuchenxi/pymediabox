@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""PyMediaBox 各页面高保真 mockup 生成器（2 Tab 布局，1080x2400）"""
+"""PyMediaBox 各页面高保真 mockup（影视仓/OK影视/蜂蜜式）1080x2400"""
 import math, os
 from PIL import Image, ImageDraw, ImageFont
 
@@ -9,23 +9,27 @@ FONT_REG = os.path.join(BASE, "fonts", "NotoSansSC-Regular.otf")
 OUT = os.path.join(BASE, "out")
 os.makedirs(OUT, exist_ok=True)
 
-BLACK        = (13, 15, 26)
-CARD         = (30, 33, 48)
-CARD2        = (37, 42, 58)
-ACCENT       = (76, 201, 240)
-ACCENT_DIM   = (46, 139, 168)
-WHITE        = (255, 255, 255)
-SECONDARY    = (138, 143, 168)
-DANGER       = (255, 107, 107)
+BLACK    = (13, 15, 26)
+CARD     = (30, 33, 48)
+CARD2    = (37, 42, 58)
+ACCENT   = (76, 201, 240)
+ACCENT_D = (46, 139, 168)
+WHITE    = (255, 255, 255)
+SECOND   = (138, 143, 168)
+DANGER   = (255, 107, 107)
+NAV_BG   = (242, 20, 31, 31)
 
 W, H = 1080, 2400
-f_title   = ImageFont.truetype(FONT_REG, 44)
-f_tab     = ImageFont.truetype(FONT_REG, 30)
-f_card_t  = ImageFont.truetype(FONT_REG, 34)
-f_card_s  = ImageFont.truetype(FONT_REG, 24)
-f_btn     = ImageFont.truetype(FONT_REG, 28)
-f_chip    = ImageFont.truetype(FONT_REG, 26)
-f_small   = ImageFont.truetype(FONT_REG, 22)
+f_logo  = ImageFont.truetype(FONT_REG, 36)
+f_tab   = ImageFont.truetype(FONT_REG, 26)
+f_hero1 = ImageFont.truetype(FONT_REG, 44)
+f_hero2 = ImageFont.truetype(FONT_REG, 26)
+f_sec   = ImageFont.truetype(FONT_REG, 32)
+f_card  = ImageFont.truetype(FONT_REG, 24)
+f_sm    = ImageFont.truetype(FONT_REG, 20)
+f_xs    = ImageFont.truetype(FONT_REG, 18)
+f_tag   = ImageFont.truetype(FONT_REG, 22)
+f_nav   = ImageFont.truetype(FONT_REG, 22)
 
 def new_page():
     img = Image.new("RGB", (W, H), BLACK)
@@ -35,347 +39,200 @@ def new_page():
 def rrect(d, box, r, fill, outline=None, width=1):
     d.rounded_rectangle(box, radius=r, fill=fill, outline=outline, width=width)
 
-def text_w(s, f):
-    b = f.getbbox(s)
-    return b[2] - b[0]
+def tw(s, f):
+    b = f.getbbox(s); return b[2]-b[0]
 
 def status_bar(d):
     d.rectangle((0, 0, W, 60), fill=BLACK)
-    d.text((40, 12), "9:41", font=f_small, fill=WHITE)
-    d.text((W - 220, 12), "5G", font=f_small, fill=SECONDARY)
-    d.rectangle((W - 120, 18, W - 40, 46), outline=SECONDARY, width=3)
-    d.rectangle((W - 112, 24, W - 60, 40), fill=ACCENT)
+    d.text((40, 14), "9:41", font=f_sm, fill=WHITE)
+    d.text((W-160, 14), "5G  100%", font=f_xs, fill=SECOND)
 
-def draw_top(d, active_tab):
-    d.text((40, 66), "PyMediaBox", font=f_title, fill=WHITE)
-    d.text((W - 160, 86), "v1.1.0", font=f_small, fill=SECONDARY)
-    d.line((0, 120, W, 120), fill=CARD, width=2)
-    tabs = ["首页", "设置"]
-    tab_w = W // 2
-    for i, t in enumerate(tabs):
-        cx = i * tab_w
-        active = (i == active_tab)
+def top_bar(d, active_tab):
+    # 顶栏 Logo + 源 + 搜索
+    d.text((40, 66), "PyMediaBox", font=f_logo, fill=WHITE)
+    # 源选择
+    sw = tw("源：演示", f_xs)+30
+    rrect(d, (W-40-sw, 80, W-40, 80+48), 12, CARD)
+    d.text((W-40-sw+15, 92), "源：演示", font=f_xs, fill=ACCENT)
+    d.line((0, 140, W, 140), fill=CARD, width=2)
+    # Tab
+    tabs = ["首页","设置"]
+    tab_w = W//2
+    for i,t in enumerate(tabs):
+        cx=i*tab_w
+        active=(i==active_tab)
         if active:
-            d.rectangle((cx + tab_w//2 - 40, 160, cx + tab_w//2 + 40, 170), fill=ACCENT)
-        d.text((cx + tab_w//2 - text_w(t, f_tab)//2, 118), t,
-               font=f_tab, fill=ACCENT if active else SECONDARY)
-    return 170
+            d.rectangle((cx+tab_w//2-40, 166, cx+tab_w//2+40, 176), fill=ACCENT)
+        d.text((cx+tab_w//2-tw(t,f_tab)//2, 148), t, font=f_tab,
+               fill=ACCENT if active else SECOND)
+    return 176
 
-def icon_search(d, cx, cy, r=18, color=SECONDARY):
-    d.ellipse((cx - r, cy - r, cx - r + int(r*0.85), cy - r + int(r*0.85)), outline=color, width=4)
-    ex = int(r*0.5)
-    d.line((cx - r + int(r*0.8) - 2, cy - r + int(r*0.8) - 2,
-            cx + ex + 4, cy + ex + 4), fill=color, width=4)
+def ic_home(d, cx, cy, r, color):
+    d.polygon([(cx-r, cy-r*0.1),(cx, cy-r*0.9),(cx+r, cy-r*0.1)], outline=color, width=4)
+    d.line((cx-r, cy-r*0.1, cx+r, cy-r*0.1), fill=color, width=4)
+    d.rectangle((cx-r*0.6, cy-r*0.1, cx+r*0.6, cy+r*0.8), outline=color, width=4)
+    d.line((cx-r*0.25, cy+r*0.8, cx-r*0.25, cy+r*0.1), fill=color, width=4)
+    d.line((cx+r*0.25, cy+r*0.8, cx+r*0.25, cy+r*0.1), fill=color, width=4)
 
-def icon_play(d, cx, cy, r=18, color=BLACK):
-    d.polygon([(cx - r//2, cy - r), (cx + r, cy), (cx - r//2, cy + r)], fill=color)
+def ic_search(d, cx, cy, r, color):
+    d.ellipse((cx-r, cy-r, cx-r*0.4, cy-r*0.4), outline=color, width=4)
+    ex=int(r*0.35)
+    d.line((cx-r*0.4+4, cy-r*0.4+4, cx+r*0.7, cy+r*0.7), fill=color, width=5)
 
-def icon_star(d, cx, cy, r, filled=False, color=SECONDARY):
+def ic_star(d, cx, cy, r, color):
     pts=[]
     for i in range(10):
-        ang = math.pi/2 + i * math.pi/5
+        ang = math.pi/2 + i*math.pi/5
         rr = r if i%2==0 else r*0.45
-        pts.append((cx + rr*math.cos(ang), cy - rr*math.sin(ang)))
-    if filled:
-        d.polygon(pts, fill=color, outline=color)
-    else:
-        d.polygon(pts, outline=color, width=3)
+        pts.append((cx+rr*math.cos(ang), cy-rr*math.sin(ang)))
+    d.polygon(pts, outline=color, width=3)
 
-def btn(d, x, y, w, label, primary=True, h=64):
-    if primary:
-        rrect(d, (x, y, x + w, y + h), 12, ACCENT)
-        d.text((x + w//2 - text_w(label, f_btn)//2, y + 16), label, font=f_btn, fill=BLACK)
-    else:
-        rrect(d, (x, y, x + w, y + h), 12, CARD, outline=CARD2, width=2)
-        d.text((x + w//2 - text_w(label, f_btn)//2, y + 16), label, font=f_btn, fill=WHITE)
+def ic_gear(d, cx, cy, r, color):
+    d.ellipse((cx-r*0.5, cy-r*0.5, cx+r*0.5, cy+r*0.5), outline=color, width=4)
+    for i in range(8):
+        ang = i*math.pi/4
+        x1=cx+r*0.5*math.cos(ang); y1=cy+r*0.5*math.sin(ang)
+        x2=cx+r*math.cos(ang);     y2=cy+r*math.sin(ang)
+        d.line((x1,y1,x2,y2), fill=color, width=4)
 
-def seg_row(d, y, labels, active_idx, x0=40, x1=None):
-    """分段按钮行"""
-    if x1 is None: x1 = W - 40
-    n = len(labels)
-    gap = 12
-    bw = (x1 - x0 - gap*(n-1)) // n
-    for i, lab in enumerate(labels):
-        bx = x0 + i * (bw + gap)
-        sel = (i == active_idx)
-        rrect(d, (bx, y, bx + bw, y + 56), 12, ACCENT if sel else CARD,
-              outline=None if sel else CARD2, width=0 if sel else 2)
-        d.text((bx + bw//2 - text_w(lab, f_btn)//2, y + 12), lab,
-               font=f_btn, fill=BLACK if sel else WHITE)
-
-def card(d, x, y, w, h, radius=24):
-    rrect(d, (x, y, x + w, y + h), radius, CARD)
-
-def card_title(d, x, y, t, sub=None):
-    d.text((x + 30, y + 26), t, font=f_card_t, fill=WHITE)
-    yy = y + 76
-    if sub:
-        d.text((x + 30, yy), sub, font=f_small, fill=SECONDARY)
-        yy += 40
-    return yy
-
-def switch(d, x, y, on=True):
-    rrect(d, (x, y, x + 80, y + 44), 22, ACCENT if on else CARD2)
-    d.ellipse((x + 4 if on else x + 40, y + 4, x + 4 + 36 if on else x + 40 + 36, y + 40),
-              fill=WHITE)
+def bottom_nav(d, active):
+    d.rectangle((0, H-72, W, H), fill=(18, 20, 32))
+    d.line((0, H-72, W, H-72), fill=CARD, width=2)
+    labels = ["首页","搜索","历史/收藏","设置"]
+    n=4
+    bw = W//n
+    for i in range(n):
+        cx = i*bw + bw//2
+        act = (i==active)
+        col = ACCENT if act else SECOND
+        if i==0: ic_home(d, cx, H-48, 16, col)
+        elif i==1: ic_search(d, cx, H-48, 16, col)
+        elif i==2: ic_star(d, cx, H-48, 18, col)
+        else: ic_gear(d, cx, H-48, 16, col)
+        d.text((cx - tw(labels[i],f_xs)//2, H-16), labels[i], font=f_xs, fill=col)
 
 # =========================================================
-# 1) 首页（含推荐/历史/收藏分段）
+# 首页
 # =========================================================
 def page_home():
     img, d = new_page()
     status_bar(d)
-    top = draw_top(d, 0)
-    y = top + 24
+    y = top_bar(d, 0)
 
-    # 视频区（黑底 + 信息卡）
-    d.rectangle((0, y, W, y + 300), fill=(0, 0, 0))
-    # 信息卡
-    rrect(d, (0, y + 210, W, y + 300), 0, CARD2)
-    # 频道图标
-    rrect(d, (28, y + 224, 100, y + 296), 14, CARD2)
-    d.text((52, y + 248), "📺", font=f_card_s, fill=ACCENT)
-    # 名称
-    d.text((118, y + 226), "频道名称", font=f_card_s, fill=WHITE)
-    d.text((118, y + 262), "收藏频道", font=f_small, fill=SECONDARY)
-    # 中间预告
-    pw = text_w("暂时没有播放预告", f_small)
-    d.text((W//2 - pw//2, y + 226), "暂时没有播放预告", font=f_small, fill=WHITE)
-    d.text((W//2 - pw//2, y + 262), "暂时没有播放预告", font=f_small, fill=SECONDARY)
-    # 集数 + 更多
-    d.text((W - 90, y + 226), "1", font=f_card_t, fill=WHITE)
-    d.text((W - 60, y + 220), "⋮", font=f_card_t, fill=WHITE)
-    y += 300 + 16
+    # ① Hero 横幅
+    hy = y + 16
+    hh = 260
+    rrect(d, (16, hy, W-16, hy+hh), 24, CARD2)
+    d.text((40, hy+40), "推荐精选", font=f_xs, fill=ACCENT)
+    d.text((40, hy+72), "今日焦点 · 在线示例影片", font=f_hero1, fill=WHITE)
+    d.text((40, hy+140), "Big Buck Bunny · 10MB · H.264", font=f_xs, fill=SECOND)
+    d.rectangle((W-120, hy+hh-50, W-50, hy+hh-14), fill=CARD)
+    d.text((W-108, hy+hh-44), "1/3", font=f_xs, fill=WHITE)
+    y = hy + hh + 16
 
-    # 收藏频道横向卡片
-    chs = [("演示", ACCENT), ("央视", CARD2), ("电影", CARD2)]
-    cx = 24
-    for lab, c in chs:
-        rrect(d, (cx, y, cx + 120, y + 150), 14, CARD)
-        rrect(d, (cx, y, cx + 120, y + 100), 14, c)
-        d.text((cx + 44, y + 40), lab[0], font=f_card_t, fill=ACCENT)
-        d.text((cx + 12, y + 110), lab, font=f_small, fill=WHITE)
-        cx += 132
-    y += 150 + 16
+    # ② 分类标签横排
+    classes = ["全部","电影","剧集","综艺","动画"]
+    cx = 16
+    for c in classes:
+        sel = c=="全部"
+        cw = tw(c, f_tag)+30
+        rrect(d, (cx, y, cx+cw, y+50), 25, ACCENT if sel else CARD,
+              outline=None if sel else CARD2, width=0 if sel else 2)
+        d.text((cx+15, y+12), c, font=f_tag, fill=BLACK if sel else SECOND)
+        cx += cw + 12
+    y += 50 + 16
 
-    # 蜂蜜式分类瀑布流：源选择 + 分类标签
-    # 源选择按钮行
-    sw = text_w("源：内置演示源", f_btn) + 40
-    rrect(d, (40, y, 40 + sw, y + 52), 12, ACCENT)
-    d.text((60, y + 14), "源：内置演示源", font=f_btn, fill=BLACK)
-    d.text((40 + sw + 16, y + 18), "蜂蜜影视 · 分类瀑布流", font=f_small, fill=SECONDARY)
-    y += 52 + 14
+    # ③ 网格标题 + 页码
+    d.text((20, y), "影片列表", font=f_sec, fill=WHITE)
+    d.text((W-140, y+8), "第 1 页", font=f_xs, fill=SECOND)
+    y += 50
 
-    # 分类标签横排
-    cls = ["电影", "剧集", "综艺", "动漫", "短片"]
-    cx = 40
-    for i, c in enumerate(cls):
-        cw = text_w(c, f_chip) + 40
-        sel = (i == 0)
-        if sel:
-            rrect(d, (cx, y, cx + cw, y + 48), 24, ACCENT)
-            d.text((cx + 20, y + 12), c, font=f_chip, fill=BLACK)
-        else:
-            rrect(d, (cx, y, cx + cw, y + 48), 24, CARD, outline=CARD2, width=2)
-            d.text((cx + 20, y + 12), c, font=f_chip, fill=SECONDARY)
-        cx += cw + 10
-    y += 48 + 16
-    # 分类下视频列表（示例 4 条）
-    vids = ["电影 · 示例片 1", "电影 · 示例片 2", "电影 · 示例片 3", "电影 · 示例片 4"]
-    for vt in vids:
-        chh = 96
-        card(d, 40, y, W - 80, chh)
-        d.text((70, y + 24), vt, font=f_card_s, fill=WHITE)
-        d.text((70, y + 62), "· 电影", font=f_small, fill=SECONDARY)
-        y += chh + 12
-    y += 8
+    # ④ 双列封面网格
+    videos = [("Big Buck Bunny","10MB","在线"),("Sintel","52MB","在线"),
+              ("Tears of Steel","108MB","在线"),("Elephants Dream","151MB","在线")]
+    col_w = (W-48)//2
+    row_h = 300
+    for i,(title,dur,tag) in enumerate(videos):
+        col = i%2
+        row = i//2
+        gx = 16 + col*(col_w+16)
+        gy = y + row*(row_h+12)
+        rrect(d, (gx, gy, gx+col_w, gy+row_h), 16, CARD)
+        # 封面
+        rrect(d, (gx, gy, gx+col_w, gy+180), 16, CARD2)
+        d.rectangle((gx, gy+160, gx+col_w, gy+180), fill=CARD2)
+        d.text((gx+col_w//2 - tw(title[0],f_card)//2, gy+70), title[0],
+               font=f_card, fill=ACCENT)
+        # 时长角标
+        d.rectangle((gx+col_w-90, gy+150, gx+col_w-8, gy+176), fill=(0,0,0))
+        d.text((gx+col_w-82, gy+154), dur, font=f_xs, fill=WHITE)
+        # 文字区
+        d.text((gx+12, gy+196), title, font=f_card, fill=WHITE)
+        d.text((gx+12, gy+236), tag, font=f_xs, fill=SECOND)
+        # 标签
+        tagw = tw(tag,f_xs)+20
+        rrect(d, (gx+12, gy+264, gx+12+tagw, gy+292), 10, ACCENT)
+        d.text((gx+12+10, gy+268), tag, font=f_xs, fill=BLACK)
+    y = y + 2*row_h + 2*12 + 16
 
-    # 搜索栏
-    rrect(d, (40, y, W - 40, y + 64), 16, CARD, outline=CARD2, width=2)
-    icon_search(d, 80, y + 32, r=18, color=SECONDARY)
-    d.text((110, y + 18), "搜索视频", font=f_card_s, fill=SECONDARY)
-    btn(d, W - 40 - 120, y, 120, "搜索")
-    y += 64 + 20
-
-    # 快捷按钮
-    hw = (W - 80 - 20) // 2
-    btn(d, 40, y, hw, "本地", primary=False, h=56)
-    btn(d, 40 + hw + 20, y, hw, "默认源", primary=False, h=56)
+    # ⑤ 历史/收藏分段
+    hw = (W-40-12)//2
+    rrect(d, (16, y, 16+hw, y+56), 12, ACCENT)
+    d.text((16+hw//2 - tw("观看历史",f_card)//2, y+14), "观看历史", font=f_card, fill=BLACK)
+    rrect(d, (16+hw+12, y, 16+hw+12+hw, y+56), 12, CARD, outline=CARD2, width=2)
+    d.text((16+hw+12+hw//2 - tw("影视收藏",f_card)//2, y+14), "影视收藏", font=f_card, fill=WHITE)
     y += 56 + 16
 
-    # 分段筛选
-    seg_row(d, y, ["推荐", "观看历史", "影视收藏"], 0)
-    y += 56 + 24
+    # ⑥ 历史卡片横排（示意 3 张）
+    for i in range(3):
+        cw2 = 200
+        gx = 16 + i*(cw2+12)
+        rrect(d, (gx, y, gx+cw2, y+150), 12, CARD)
+        rrect(d, (gx, y, gx+cw2, y+90), 12, CARD2)
+        d.rectangle((gx, y+80, gx+cw2, y+90), fill=CARD2)
+        d.text((gx+cw2//2-10, y+30), "影", font=f_card, fill=ACCENT)
+        d.text((gx+10, y+102), "Big Buck Bunny", font=f_xs, fill=WHITE)
+        d.text((gx+10, y+124), "在线 · 09-18 21:50", font=f_xs, fill=SECOND)
+    y += 150 + 20
 
-    # 列表
-    items = [
-        ("在线示例 · Big Buck Bunny", "在线", ACCENT, "https://sample-videos.com/...mp4"),
-        ("在线示例 · Sintel", "在线", ACCENT, "https://media.w3.org/2010/05/sintel/trailer.mp4"),
-        ("电影 · 分类", "API:内置演示源", CARD2, None),
-        ("剧集 · 分类", "API:内置演示源", CARD2, None),
-        ("综艺 · 分类", "API:内置演示源", CARD2, None),
-    ]
-    for title, tag, tagc, link in items:
-        ch = 110
-        card(d, 40, y, W - 80, ch)
-        d.text((70, y + 28), title, font=f_card_s, fill=WHITE)
-        tw = text_w(tag, f_small) + 24
-        rrect(d, (W - 70 - tw, y + 34, W - 70, y + 34 + 32), 14, tagc)
-        d.text((W - 70 - tw + 12, y + 38), tag, font=f_small, fill=BLACK if tagc==ACCENT else SECONDARY)
-        if link:
-            d.text((70, y + 70), link, font=f_small, fill=SECONDARY)
-        y += ch + 14
+    # ⑦ 快捷入口
+    kw = (W-40-12)//2
+    rrect(d, (16, y, 16+kw, y+64), 12, CARD, outline=CARD2, width=2)
+    d.text((16+kw//2 - tw("本地媒体",f_card)//2, y+18), "本地媒体", font=f_card, fill=WHITE)
+    rrect(d, (16+kw+12, y, 16+kw+12+kw, y+64), 12, CARD, outline=CARD2, width=2)
+    d.text((16+kw+12+kw//2 - tw("默认源播放",f_card)//2, y+18), "默认源播放", font=f_card, fill=WHITE)
 
+    bottom_nav(d, 0)
     img.save(os.path.join(OUT, "01_home.png"))
+    print("home ok")
 
 # =========================================================
-# 2) 设置页（含 API 源管理 + 爬虫调试器）
+# 设置页
 # =========================================================
 def page_settings():
     img, d = new_page()
     status_bar(d)
-    top = draw_top(d, 1)
-    y = top + 24
+    y = top_bar(d, 1)
 
-    # 卡片1 播放行为
-    c1h = 380
-    card(d, 40, y, W - 80, c1h)
-    yy = card_title(d, 40, y, "播放行为")
-    d.text((70, yy), "保持屏幕常亮", font=f_card_s, fill=WHITE)
-    switch(d, W - 150, yy + 6)
-    yy += 60
-    d.text((70, yy), "断点续播（记住上次进度）", font=f_card_s, fill=WHITE)
-    switch(d, W - 150, yy + 6)
-    yy += 70
-    d.text((70, yy), "默认播放源", font=f_small, fill=SECONDARY)
-    yy += 36
-    rrect(d, (70, yy, W - 70, yy + 64), 14, CARD2, outline=ACCENT_DIM, width=2)
-    d.text((94, yy + 20), "https://sample-videos.com/.../big_buck_bunny.mp4",
-           font=f_small, fill=SECONDARY)
-    yy += 64 + 16
-    btn(d, 70, yy, W - 140, "播放默认源")
-    y += c1h + 20
+    cards = [
+        ("播放行为", 300),
+        ("API 源管理", 340),
+        ("Python 爬虫调试器", 460),
+        ("播放器设置", 460),
+        ("数据管理", 150),
+        ("关于", 200),
+    ]
+    for title, ch in cards:
+        rrect(d, (16, y, W-16, y+ch), 20, CARD)
+        d.text((40, y+24), title, font=f_sec, fill=WHITE)
+        # 占位内容线
+        for k in range(3):
+            rrect(d, (40, y+80+k*56, W-40, y+80+k*56+40), 10, CARD2)
+        y += ch + 16
 
-    # 卡片2 API 源管理
-    c2h = 400
-    card(d, 40, y, W - 80, c2h)
-    yy = card_title(d, 40, y, "API 源管理", "TVBox 式 JSON 接口源")
-    rrect(d, (70, yy, W - 70, yy + 64), 14, CARD2, outline=ACCENT_DIM, width=2)
-    d.text((94, yy + 20), "接口 URL（TVBox JSON 格式）", font=f_small, fill=SECONDARY)
-    yy += 64 + 12
-    btn(d, 70, yy, W - 140, "＋ 添加 API 源", h=56)
-    yy += 56 + 16
-    srcs = [("内置演示源", "pymediabox://builtin", "内置", True),
-            ("蜂蜜源", "https://fengmi.example/vod", "自定义", False),
-            ("API 源", "https://api.example.com/vod", "自定义", False)]
-    for name, url, badge, builtin in srcs:
-        ch = 88
-        rrect(d, (70, yy, W - 70, yy + ch), 12, CARD2)
-        d.text((94, yy + 14), name, font=f_card_s, fill=WHITE)
-        d.text((94, yy + 52), url, font=f_small, fill=SECONDARY)
-        bw = text_w(badge, f_small) + 24
-        bx = W - 70 - bw - 20
-        rrect(d, (bx, yy + 28, bx + bw, yy + 60), 14, ACCENT if builtin else CARD2)
-        d.text((bx + 12, yy + 32), badge, font=f_small,
-               fill=BLACK if builtin else SECONDARY)
-        if not builtin:
-            dw = text_w("删除", f_small)
-            d.text((bx - 12 - dw, yy + 32), "删除", font=f_small, fill=DANGER)
-        yy += ch + 12
-    y += c2h + 20
-
-    # 卡片3 爬虫调试器
-    c3h = 480
-    card(d, 40, y, W - 80, c3h)
-    yy = card_title(d, 40, y, "Python 爬虫调试器", "TVBox Spider 协议接口即时调用")
-    # chips
-    cx = 70
-    for label, sel in [("首页", True), ("分类", False), ("搜索", False), ("详情", False), ("播放器", False)]:
-        cw = text_w(label, f_chip) + 40
-        if sel:
-            rrect(d, (cx, yy, cx + cw, yy + 52), 26, ACCENT)
-            d.text((cx + 20, yy + 12), label, font=f_chip, fill=BLACK)
-        else:
-            rrect(d, (cx, yy, cx + cw, yy + 52), 26, CARD, outline=CARD2, width=2)
-            d.text((cx + 20, yy + 12), label, font=f_chip, fill=SECONDARY)
-        cx += cw + 10
-    yy += 52 + 18
-    # 参数 + 运行
-    rrect(d, (70, yy, W - 200, yy + 64), 14, CARD2, outline=ACCENT_DIM, width=2)
-    d.text((94, yy + 20), "参数（分类号 / 关键词 / ID）", font=f_small, fill=SECONDARY)
-    btn(d, W - 180, yy, 110, "运行")
-    yy += 64 + 18
-    # 结果
-    d.text((70, yy), "响应结果", font=f_small, fill=SECONDARY)
-    yy += 34
-    rrect(d, (70, yy, W - 70, yy + 150), 12, BLACK)
-    lines = ['{', '  "class": [', '    {"type": "1", "name": "电影"},',
-             '    {"type": "2", "name": "剧集"},', '    {"type": "3", "name": "综艺"}', '  ]', '}']
-    for i, ln in enumerate(lines):
-        d.text((90, yy + 12 + i * 19), ln, font=f_small,
-               fill=ACCENT if i in (0, 6) else SECONDARY)
-    y += c3h + 20
-
-    # 卡片4 播放器配置
-    c4h = 560
-    card(d, 40, y, W - 80, c4h)
-    yy = card_title(d, 40, y, "播放器设置")
-    # 内核
-    d.text((70, yy), "内核", font=f_small, fill=SECONDARY)
-    yy += 34
-    kw = (W - 140 - 4*8) // 3
-    klabels = ["系统", "EXO硬解", "EXO软解"]
-    for i, kl in enumerate(klabels):
-        kx = 70 + i * (kw + 8)
-        sel = (i == 0)
-        rrect(d, (kx, yy, kx + kw, yy + 56), 12, ACCENT if sel else CARD2,
-              outline=None if sel else CARD2, width=0 if sel else 2)
-        d.text((kx + kw//2 - text_w(kl, f_btn)//2, yy + 14), kl, font=f_btn,
-               fill=BLACK if sel else WHITE)
-    yy += 56 + 20
-    # 画面缩放
-    d.text((70, yy), "画面缩放", font=f_small, fill=SECONDARY)
-    yy += 34
-    scales = ["默认", "16:9", "4:3", "填充", "原始", "剪裁"]
-    sw_ = (W - 140 - 5*8) // 6
-    for i, sc in enumerate(scales):
-        sx = 70 + i * (sw_ + 8)
-        sel = (i == 0)
-        rrect(d, (sx, yy, sx + sw_, yy + 50), 12, ACCENT if sel else CARD2)
-        d.text((sx + sw_//2 - text_w(sc, f_small)//2, yy + 14), sc, font=f_small,
-               fill=BLACK if sel else SECONDARY)
-    yy += 50 + 20
-    # 超时换源
-    d.text((70, yy), "超时换源（秒）", font=f_small, fill=SECONDARY)
-    yy += 34
-    touts = ["5", "10", "20", "30"]
-    tw_ = (W - 140 - 3*8) // 4
-    for i, t in enumerate(touts):
-        tx = 70 + i * (tw_ + 8)
-        sel = (i == 3)
-        rrect(d, (tx, yy, tx + tw_, yy + 50), 12, ACCENT if sel else CARD2)
-        d.text((tx + tw_//2 - text_w(t, f_small)//2, yy + 14), t, font=f_small,
-               fill=BLACK if sel else SECONDARY)
-    yy += 50 + 20
-    # 高级
-    d.text((70, yy), "搜索线程", font=f_small, fill=SECONDARY)
-    yy += 34
-    rrect(d, (70, yy, W//2, yy + 56), 12, CARD2, outline=ACCENT_DIM, width=2)
-    d.text((94, yy + 18), "8", font=f_card_s, fill=WHITE)
-    btn(d, W//2 + 20, yy, W - 140 - (W//2 + 20), "保存", h=56)
-    yy += 56 + 16
-    rrect(d, (70, yy, W - 70, yy + 50), 12, CARD2)
-    d.text((W//2 - text_w("恢复默认", f_btn)//2, yy + 12), "恢复默认", font=f_btn, fill=WHITE)
-    y += c4h + 20
-
-    # 卡片5 数据管理
-    c5h = 160
-    card(d, 40, y, W - 80, c5h)
-    yy = card_title(d, 40, y, "数据管理")
-    btn(d, 70, yy, W - 140, "清除播放历史 / 收藏 / 断点", primary=False)
-    y += c5h + 20
-
+    bottom_nav(d, 3)
     img.save(os.path.join(OUT, "02_settings.png"))
+    print("settings ok")
 
 if __name__ == "__main__":
     page_home()
