@@ -1,21 +1,18 @@
 package com.pymediabox.app;
 
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PowerManager;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.ui.PlayerView;
-
 public class PlayerActivity extends AppCompatActivity {
 
-    private ExoPlayer exoPlayer;
-    private PlayerView playerView;
+    private VideoView videoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,16 +24,15 @@ public class PlayerActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra("url");
         tv.setText(title != null ? title : "播放中");
 
-        playerView = findViewById(R.id.player_view);
-
-        try { exoPlayer = ExoPlayer.Builder(this).build(); } catch (Throwable t) { Toast.makeText(this, "ExoPlayer 不可用: "+t.getMessage(), Toast.LENGTH_LONG).show(); finish(); return; }
-        playerView.setPlayer(exoPlayer);
-
+        videoView = findViewById(R.id.vv_player);
+        videoView.setMediaController(new MediaController(this));
         try {
-            MediaItem item = MediaItem.fromUri(Uri.parse(url));
-            exoPlayer.setMediaItem(item);
-            exoPlayer.prepare();
-            exoPlayer.play();
+            videoView.setVideoURI(Uri.parse(url));
+            videoView.setOnPreparedListener(mp -> mp.start());
+            videoView.setOnErrorListener((mp, what, extra) -> {
+                Toast.makeText(this, "播放失败 what=" + what, Toast.LENGTH_SHORT).show();
+                return true;
+            });
         } catch (Exception e) {
             Toast.makeText(this, "无法解析播放地址: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
@@ -45,12 +41,12 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (exoPlayer != null) exoPlayer.pause();
+        if (videoView != null && videoView.isPlaying()) videoView.pause();
     }
 
     @Override
     protected void onDestroy() {
-        if (exoPlayer != null) { exoPlayer.release(); exoPlayer = null; }
+        if (videoView != null) { videoView.stopPlayback(); videoView = null; }
         super.onDestroy();
     }
 }
