@@ -19,6 +19,7 @@
     <string name="src_add_hint">接口 URL（TVBox JSON 格式）</string>
     <string name="btn_add_source">＋ 添加源</string>
     <string name="btn_remove">删除</string>
+    <string name="label_src_hint">接口 URL（TVBox JSON 格式）</string>
 
     <!-- 队列页 -->
     <string name="queue_history">播放历史</string>
