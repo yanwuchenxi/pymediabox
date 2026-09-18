@@ -62,7 +62,7 @@ public class HomeFragment extends Fragment {
 
         // 示例数据 + 本地扫描
         refresh(true);
-        swipe.setOnRefreshListener(this::refresh);
+        swipe.setOnRefreshListener(() -> refresh(false));
     }
 
     private void refresh(boolean showLoading) {
