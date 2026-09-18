@@ -155,7 +155,8 @@ public class SettingsFragment extends Fragment {
         ChipGroup scaleGroup = v.findViewById(R.id.chip_scale);
         int scaleIdx = playerConfig.scaleIndex();
         int chipId = scaleGroup.getChildCount();
-        for (int i = 0; i < chipId; i++) {
+        final int scaleCount = chipId;
+        for (int i = 0; i < scaleCount; i++) {
             final int idx = i;
             Chip chip = (Chip) scaleGroup.getChildAt(i);
             chip.setChecked(i == scaleIdx);
@@ -171,15 +172,17 @@ public class SettingsFragment extends Fragment {
         // 超时换源（ChipGroup）
         ChipGroup timeoutGroup = v.findViewById(R.id.chip_timeout);
         int[] timeoutVals = {5, 10, 20, 30};
-        for (int i = 0; i < timeoutGroup.getChildCount(); i++) {
+        final int timeoutCount = timeoutGroup.getChildCount();
+        for (int i = 0; i < timeoutCount; i++) {
             final int val = timeoutVals[i];
+            final int idx = i;
             Chip chip = (Chip) timeoutGroup.getChildAt(i);
             chip.setChecked(playerConfig.timeoutSec() == val);
             chip.setOnCheckedChangeListener((c, on) -> {
                 if (on) {
                     playerConfig.setTimeout(val);
                     for (int j = 0; j < timeoutGroup.getChildCount(); j++)
-                        if (j != i) ((Chip) timeoutGroup.getChildAt(j)).setChecked(false);
+                        if (j != idx) ((Chip) timeoutGroup.getChildAt(j)).setChecked(false);
                 }
             });
         }
