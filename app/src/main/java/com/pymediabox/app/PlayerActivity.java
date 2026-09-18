@@ -29,7 +29,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         playerView = findViewById(R.id.player_view);
 
-        exoPlayer = ExoPlayer.Builder(this).build();
+        try { exoPlayer = ExoPlayer.Builder(this).build(); } catch (Throwable t) { Toast.makeText(this, "ExoPlayer 不可用: "+t.getMessage(), Toast.LENGTH_LONG).show(); finish(); return; }
         playerView.setPlayer(exoPlayer);
 
         try {
