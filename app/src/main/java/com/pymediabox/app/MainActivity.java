@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.chaquo.python.PyModule;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 
@@ -87,13 +86,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void runPythonSpider() {
-        Python py = Python.getInterpreter();
+        Python py = Python.getInstance();
         try {
-            // chaquopy 将 src/main/python/ 下的 .py 文件作为可导入模块
-            PyModule mod = py.importModule("spider", 0);
-            PyObject createSpider = mod.callattr("create_spider");
+            // src/main/python/spider.py 会作为模块 spider 打进 APK，可直接 import
+            PyObject createSpider = py.getModule("spider").getAttr("create_spider");
             PyObject spider = createSpider.call();
-            PyObject result = spider.callattr("home_content");
+            PyObject result = spider.getAttr("home_content").call();
             String s = result != null ? result.toString() : "";
             PySpiderCache.last = s;
             Toast.makeText(this, "Python 爬虫响应长度=" + s.length(),
