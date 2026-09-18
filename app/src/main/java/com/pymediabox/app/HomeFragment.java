@@ -3,16 +3,14 @@ package com.pymediabox.app;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -79,6 +76,12 @@ public class HomeFragment extends Fragment {
             openUrl(getContext(), "https://example.com?q=" + q, "搜索：" + q);
         });
         btnScanLocal.setOnClickListener(x -> requestLocalPermission());
+        v.findViewById(R.id.btn_default).setOnClickListener(x -> {
+            SharedPreferences sp = getContext().getSharedPreferences("pymediabox", Context.MODE_PRIVATE);
+            String url = sp.getString("default_url",
+                    "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4");
+            openUrl(getContext(), url, "默认源");
+        });
 
         refresh(true);
         swipe.setOnRefreshListener(() -> refresh(false));

@@ -11,7 +11,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 爬虫操作卡片 -->
+        <!-- 爬虫接口卡片 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Python 爬虫"
+                    android:text="Python 爬虫接口"
                     android:textColor="@color/white"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -37,59 +37,71 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="TVBox Spider 接口 · Python 解析视频源"
+                    android:text="TVBox Spider 协议 · 选择接口即时调用"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
 
-                <!-- 分类选择 + 执行 -->
+                <!-- 接口选择（首页/分类/搜索/详情/播放器） -->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_methods"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:singleLine="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_home"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:checkable="true"
+                        android:checked="true"
+                        android:text="首页" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_category"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:checkable="true"
+                        android:text="分类" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:checkable="true"
+                        android:text="搜索" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:checkable="true"
+                        android:text="详情" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chip_player"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:checkable="true"
+                        android:text="播放器" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- 参数区：分类/搜索/详情/播放器 的入参 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal">
-
-                    <Spinner
-                        android:id="@+id/spinner_category"
-                        android:layout_width="0dp"
-                        android:layout_height="44dp"
-                        android:layout_weight="1"
-                        android:background="@color/card_bg" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_run_home"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="8dp"
-                        android:text="首页"
-                        android:backgroundTint="@color/accent"
-                        android:textColor="@color/black" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_run_detail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="4dp"
-                        android:text="详情"
-                        android:backgroundTint="@color/card_bg"
-                        android:textColor="@color/white" />
-                </LinearLayout>
-
-                <!-- 搜索 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_height="44dp"
                         android:layout_weight="1"
-                        android:hint="搜索关键词"
+                        android:hint="参数（分类号 / 关键词 / ID）"
                         app:boxStrokeColor="@color/accent">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_search_spider"
+                            android:id="@+id/et_param"
                             android:layout_width="match_parent"
                             android:layout_height="44dp"
                             android:inputType="text"
@@ -99,21 +111,44 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_search_spider"
+                        android:id="@+id/btn_run"
                         android:layout_width="80dp"
                         android:layout_height="44dp"
                         android:layout_marginStart="8dp"
-                        android:text="搜索"
+                        android:text="运行"
                         android:backgroundTint="@color/accent"
                         android:textColor="@color/black" />
                 </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                <!-- 播放直链 -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_url"
+        <!-- 播放入口卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:text="播放入口"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:hint="视频直链 / 播放地址"
                     app:boxStrokeColor="@color/accent">
 
@@ -135,35 +170,52 @@
                     android:text="▶ 播放"
                     android:backgroundTint="@color/accent"
                     android:textColor="@color/black" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                <!-- 结果展示 -->
+        <!-- 结果展示卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="查询结果"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
+                    android:text="响应结果"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tv_result"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:background="@color/card_bg"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/black"
                     android:fontFamily="monospace"
                     android:padding="10dp"
-                    android:text="点击「首页」「详情」「搜索」按钮查看 Python 爬虫响应"
+                    android:text="选择上方接口并点击「运行」查看 Python 爬虫响应"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 历史卡片 -->
+        <!-- 操作历史卡片 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
             app:cardBackgroundColor="@color/card_bg"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp">
@@ -188,7 +240,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:fontFamily="monospace"
-                    android:maxLines="8"
+                    android:maxLines="6"
                     android:textColor="@color/text_secondary"
                     android:textSize="10sp" />
             </LinearLayout>

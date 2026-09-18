@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +40,13 @@ public class SettingsFragment extends Fragment {
         prefs = getContext().getSharedPreferences("pymediabox", Context.MODE_PRIVATE);
         sourceManager = new ApiSourceManager(getContext());
         resumeManager = new ResumeManager(getContext());
+
+        // 版本
+        TextView tvVer = v.findViewById(R.id.tv_settings_version);
+        try {
+            tvVer.setText("版本 " + getContext().getPackageManager()
+                    .getPackageInfo(getContext().getPackageName(), 0).versionName);
+        } catch (Exception ignored) { }
 
         // 默认播放源
         TextInputEditText etUrl = v.findViewById(R.id.et_default_url);
@@ -94,13 +102,15 @@ public class SettingsFragment extends Fragment {
 
         // 本地扫描
         v.findViewById(R.id.btn_scan_local).setOnClickListener(x ->
-                Toast.makeText(getContext(), "本地扫描将在「首页」标签页显示", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "请在「首页」点击 📂 本地 进行扫描",
+                        Toast.LENGTH_SHORT).show());
 
-        // 清除历史/收藏
+        // 清除历史/收藏/断点
         v.findViewById(R.id.btn_clear_history).setOnClickListener(x -> {
             new HistoryManager(getContext()).clearAll();
             resumeManager.clearAll();
-            Toast.makeText(getContext(), "播放历史、收藏与进度已清除", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "播放历史、收藏与断点已清除",
+                    Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -110,15 +120,14 @@ public class SettingsFragment extends Fragment {
             adapter = new SourceAdapter(items);
             recyclerSources.setAdapter(adapter);
         } else {
-            adapter.data = items;
-            adapter.notifyDataSetChanged();
+            adapter.bind(items);
         }
     }
 
     class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.VH> {
-        List<ApiSourceManager.Source> data;
-
+        private List<ApiSourceManager.Source> data;
         SourceAdapter(List<ApiSourceManager.Source> d) { this.data = d; }
+        void bind(List<ApiSourceManager.Source> d) { data = d; notifyDataSetChanged(); }
 
         @NonNull @Override
         public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
