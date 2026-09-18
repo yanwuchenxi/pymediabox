@@ -1,8 +1,8 @@
 package com.pymediabox.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,18 +46,24 @@ public class SettingsFragment extends Fragment {
         sw.setChecked(prefs.getBoolean("keep_screen", false));
         sw.setOnCheckedChangeListener((b, checked) -> {
             prefs.edit().putBoolean("keep_screen", checked).apply();
-            getActivity().getWindow().addFlags(checked
-                    ? WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                    : 0);
-            if (!checked) getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            if (getActivity() == null) return;
+            if (checked)
+                getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            else
+                getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         });
         if (sw.isChecked())
             getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // 本地扫描
-        v.findViewById(R.id.btn_scan_local).setOnClickListener(x -> {
-            Toast.makeText(getContext(),
-                    "本地扫描将在「首页」标签页显示", Toast.LENGTH_SHORT).show();
+        v.findViewById(R.id.btn_scan_local).setOnClickListener(x ->
+                Toast.makeText(getContext(), "本地扫描将在「首页」标签页显示", Toast.LENGTH_SHORT).show());
+
+        // 清除历史/收藏
+        v.findViewById(R.id.btn_clear_history).setOnClickListener(x -> {
+            SharedPreferences h = getContext().getSharedPreferences("pymediabox_history", Context.MODE_PRIVATE);
+            h.edit().clear().apply();
+            Toast.makeText(getContext(), "播放历史与收藏已清除", Toast.LENGTH_SHORT).show();
         });
     }
 }
