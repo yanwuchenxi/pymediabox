@@ -1,13 +1,18 @@
 package com.pymediabox.app;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,32 +26,34 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputLayout;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
 
-    public static final String KEY_FILE = "file";
-    public static final String KEY_TITLE = "title";
-    public static final String KEY_INDEX = "index";
-
     private RecyclerView recycler;
     private Adapter adapter;
     private List<Item> items = new ArrayList<>();
     private SwipeRefreshLayout swipe;
+    private EditText etSearch;
+    private MaterialButton btnSearch, btnScanLocal;
+    private TextView tvEmpty;
 
-    public static void openUrl(android.content.Context ctx, String url, String title) {
+    static class Item {
+        String title, link, type;
+        Item(String t, String l, String ty) { title=t; link=l; type=ty; }
+    }
+
+    public static void openUrl(Context ctx, String url, String title) {
         Intent i = new Intent(ctx, PlayerActivity.class);
         i.putExtra("url", url);
         i.putExtra("title", title);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(i);
-    }
-
-    static class Item {
-        String title, link, type;
-        Item(String t, String l, String ty) { title=t; link=l; type=ty; }
     }
 
     @Nullable @Override
@@ -60,23 +67,65 @@ public class HomeFragment extends Fragment {
         swipe.setColorSchemeResources(R.color.accent);
         recycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // 示例数据 + 本地扫描
+        etSearch = v.findViewById(R.id.et_search);
+        btnSearch = v.findViewById(R.id.btn_search);
+        btnScanLocal = v.findViewById(R.id.btn_scan_local);
+        tvEmpty = v.findViewById(R.id.tv_empty);
+
+        btnSearch.setOnClickListener(x -> {
+            String q = etSearch.getText().toString().trim();
+            if (q.isEmpty()) return;
+            // 搜索：构造 URL 跳转播放页（实际项目中可替换为真实搜索源）
+            openUrl(getContext(), "https://example.com?q=" + q, "搜索：" + q);
+        });
+        btnScanLocal.setOnClickListener(x -> requestLocalPermission());
+
         refresh(true);
         swipe.setOnRefreshListener(() -> refresh(false));
+    }
+
+    private void requestLocalPermission() {
+        AppCompatActivity host = (AppCompatActivity) getActivity();
+        int need = ContextCompat.checkSelfPermission(host, Manifest.permission.READ_MEDIA_VIDEO);
+        if (need != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(host, new String[]{
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO}, 1001);
+        } else {
+            refresh(false);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1001) {
+            for (int r : grantResults) if (r == PackageManager.PERMISSION_GRANTED) { refresh(false); return; }
+            Toast.makeText(getContext(), "未授予媒体读取权限", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void refresh(boolean showLoading) {
         if (showLoading) swipe.setRefreshing(true);
         items.clear();
+        // 在线示例
         items.add(new Item("在线示例 · Big Buck Bunny",
                 "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4", "在线"));
-        items.add(new Item("在线示例 · H.265 测试",
-                "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4", "在线"));
+        items.add(new Item("在线示例 · Sintel",
+                "https://media.w3.org/2010/05/sintel/trailer.mp4", "在线"));
+        // 本地媒体
         addLocalVideos(items);
+        // 空状态
+        if (items.isEmpty()) tvEmpty.setVisibility(View.VISIBLE);
+        else tvEmpty.setVisibility(View.GONE);
+
         if (adapter == null) {
             adapter = new Adapter(items);
             recycler.setAdapter(adapter);
-        } else adapter.notifyDataSetChanged();
+        } else {
+            adapter.notifyDataSetChanged();
+        }
         swipe.setRefreshing(false);
     }
 
@@ -90,7 +139,7 @@ public class HomeFragment extends Fragment {
         if (files == null) return;
         for (File f : files) {
             String n = f.getName().toLowerCase();
-            if (n.endsWith(".mp4") || n.endsWith(".mkv") || n.endsWith(".m4v"))
+            if (n.endsWith(".mp4") || n.endsWith(".mkv") || n.endsWith(".m4v") || n.endsWith(".avi"))
                 out.add(new Item(f.getName(), f.getAbsolutePath(), "本地"));
         }
     }
@@ -107,12 +156,7 @@ public class HomeFragment extends Fragment {
             h.title.setText(it.title);
             h.link.setText(it.link);
             h.type.setText(it.type);
-            h.itemView.setOnClickListener(v -> {
-                Intent i = new Intent(getContext(), PlayerActivity.class);
-                i.putExtra("url", it.link);
-                i.putExtra("title", it.title);
-                startActivity(i);
-            });
+            h.itemView.setOnClickListener(v -> openUrl(getContext(), it.link, it.title));
         }
         @Override public int getItemCount() { return data.size(); }
 

@@ -26,40 +26,51 @@ class PySpider:
 
     def home_content(self):
         """返回首页分类列表，JSON 字符串"""
-        # 示例：返回内置分类
         data = {
             "class": [
                 {"type": "1", "name": "电影"},
                 {"type": "2", "name": "剧集"},
                 {"type": "3", "name": "综艺"},
+                {"type": "4", "name": "动画"},
             ]
         }
-        return json.dumps(data, ensure_ascii=False)
+        return json.dumps(data, ensure_ascii=False, indent=2)
 
     def category_content(self, tid="1", pg="1"):
         """返回分类下的视频列表，JSON 字符串"""
         data = {
             "list": [
-                {"name": "示例 1", "type": tid, "link": "https://example.com/1"},
-                {"name": "示例 2", "type": tid, "link": "https://example.com/2"},
+                {"name": "示例电影 " + tid, "type": tid, "link": "https://example.com/movie/" + tid},
+                {"name": "示例剧集 " + tid, "type": tid, "link": "https://example.com/series/" + tid},
             ]
         }
-        return json.dumps(data, ensure_ascii=False)
+        return json.dumps(data, ensure_ascii=False, indent=2)
 
     def search_content(self, key=""):
         """搜索，JSON 字符串"""
         data = {"list": []}
         if key:
-            data["list"].append({"name": key, "type": "movie", "link": "https://example.com?q=" + urllib.parse.quote(key)})
-        return json.dumps(data, ensure_ascii=False)
+            data["list"].append({
+                "name": key,
+                "type": "movie",
+                "link": "https://example.com?q=" + urllib.parse.quote(key),
+            })
+        return json.dumps(data, ensure_ascii=False, indent=2)
 
     def detail_content(self, id_=""):
         """详情，JSON 字符串"""
-        return json.dumps({"name": "详情 " + id_, "link": "https://example.com/" + id_}, ensure_ascii=False)
+        return json.dumps({
+            "name": "详情 " + id_,
+            "link": "https://example.com/" + id_,
+            "tags": ["示例", "Python 爬虫"],
+        }, ensure_ascii=False, indent=2)
 
     def player_content(self, flag="", id_=""):
         """播放器地址，JSON 字符串"""
-        return json.dumps({"url": "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4"}, ensure_ascii=False)
+        return json.dumps({
+            "url": "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4",
+            "name": "Big Buck Bunny",
+        }, ensure_ascii=False, indent=2)
 
 def create_spider(base_url=""):
     return PySpider(base_url)
