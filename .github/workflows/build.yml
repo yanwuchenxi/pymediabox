@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ---- 单元验证 Python 爬虫 ----
+      - name: Run Python spider tests
+        run: |
+          cd app/src/main/assets/python
+          python -m unittest -v test_spider.py
+
+      # ---- 构建 Android 应用 ----
+      - name: Grant wrapper script permission
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: |
+          ./gradlew assembleRelease --build-cache --parallel --no-daemon --stacktrace
+
+      - name: Prepare APK artifact
+        run: |
+          mkdir -p apk
+          find . -name "*-release.apk" -exec cp {} apk/ \;
+          ls -lh apk/
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: pymediabox-release
+          path: apk/
+          if-no-files-found: error

@@ -1,0 +1,69 @@
+plugins {
+    id 'com.android.application'
+    id 'com.chaquo.python'
+}
+
+android {
+    namespace 'com.pymediabox.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.pymediabox.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("${rootDir}/signing/pymediabox-release.p12")
+            storeType "pkcs12"
+            storePassword "pymediabox"
+            keyAlias "pymediabox"
+            keyPassword "pymediabox"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.19.1'
+    implementation 'com.google.android.exoplayer:exoplayer-hls:2.19.1'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.19.1'
+    implementation 'com.google.android.exoplayer:exoplayer-extractor:2.19.1'
+    implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:2.19.1'
+    implementation 'com.google.android.exoplayer:extension-rtmp:2.19.1'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+python {
+    version = '3.10'
+    pip {
+        install 'requests'
+        install 'beautifulsoup4'
+        install 'lxml'
+        install 'pycryptodome'
+        install 'jsonpath'
+        install 'cachetools'
+        install 'pyquery'
+    }
+}
