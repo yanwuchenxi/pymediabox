@@ -30,6 +30,7 @@ public class SettingsFragment extends Fragment {
     private ResumeManager resumeManager;
     private RecyclerView recyclerSources;
     private SourceAdapter adapter;
+    private String spiderMethod = "home";
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup c, @Nullable Bundle s) {
@@ -100,6 +101,22 @@ public class SettingsFragment extends Fragment {
         recyclerSources.setLayoutManager(new LinearLayoutManager(getContext()));
         refreshSources();
 
+        // ===== Python 爬虫调试器（原爬虫页合并） =====
+        com.google.android.material.chip.ChipGroup chips = v.findViewById(R.id.chip_methods);
+        bindChip(v.findViewById(R.id.chip_home), "home");
+        bindChip(v.findViewById(R.id.chip_category), "category");
+        bindChip(v.findViewById(R.id.chip_search), "search");
+        bindChip(v.findViewById(R.id.chip_detail), "detail");
+        bindChip(v.findViewById(R.id.chip_player), "player");
+        v.findViewById(R.id.btn_run).setOnClickListener(x -> {
+            com.google.android.material.textfield.TextInputEditText etParam =
+                    v.findViewById(R.id.et_param);
+            String param = etParam.getText().toString().trim();
+            String label = spiderLabel(spiderMethod) + (param.isEmpty() ? "" : " " + param);
+            v.findViewById(R.id.tv_result).setText(runSpider(spiderMethod, param));
+            addSpiderHistory(label);
+        });
+
         // 本地扫描
         v.findViewById(R.id.btn_scan_local).setOnClickListener(x ->
                 Toast.makeText(getContext(), "请在「首页」点击 📂 本地 进行扫描",
@@ -112,6 +129,60 @@ public class SettingsFragment extends Fragment {
             Toast.makeText(getContext(), "播放历史、收藏与断点已清除",
                     Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void bindChip(com.google.android.material.chip.Chip chip, String m) {
+        chip.setOnCheckedChangeListener((c, checked) -> { if (checked) spiderMethod = m; });
+    }
+
+    private String spiderLabel(String m) {
+        switch (m) {
+            case "category": return "分类";
+            case "search": return "搜索";
+            case "detail": return "详情";
+            case "player": return "播放器";
+            default: return "首页";
+        }
+    }
+
+    private void addSpiderHistory(String action) {
+        String ts = new java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
+                .format(new java.util.Date());
+        String line = "· " + ts + " " + action + "\n";
+        String old = prefs.getString("spider_history", "");
+        prefs.edit().putString("spider_history", line + old).apply();
+    }
+
+    private String runSpider(String m, String param) {
+        try {
+            com.chaquo.python.Python py = com.chaquo.python.Python.getInstance();
+            com.chaquo.python.PyObject spider =
+                    py.getModule("spider").callAttr("create_spider").call();
+            com.chaquo.python.PyObject result;
+            switch (m) {
+                case "category":
+                    result = spider.callAttr("category_content",
+                            new String[]{param.isEmpty() ? "1" : param, "1"});
+                    break;
+                case "search":
+                    result = spider.callAttr("search_content",
+                            new String[]{param.isEmpty() ? "测试" : param});
+                    break;
+                case "detail":
+                    result = spider.callAttr("detail_content",
+                            new String[]{param.isEmpty() ? "1" : param});
+                    break;
+                case "player":
+                    result = spider.callAttr("player_content",
+                            new String[]{"", param.isEmpty() ? "1" : param});
+                    break;
+                default:
+                    result = spider.callAttr("home_content");
+            }
+            return result != null ? result.toString() : "";
+        } catch (Exception e) {
+            return "Python 异常: " + e.getMessage();
+        }
     }
 
     private void refreshSources() {

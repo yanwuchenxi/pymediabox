@@ -6,7 +6,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.tabs.TabLayout;
@@ -28,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout = findViewById(R.id.tab_layout);
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_home));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_spider));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_queue));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_settings));
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -45,9 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private void selectTab(int pos) {
         Fragment f;
         switch (pos) {
-            case 1: f = new SpiderFragment(); break;
-            case 2: f = new QueueFragment(); break;
-            case 3: f = new SettingsFragment(); break;
+            case 1: f = new SettingsFragment(); break;
             default: f = new HomeFragment(); break;
         }
         FragmentTransaction t = getSupportFragmentManager().beginTransaction();

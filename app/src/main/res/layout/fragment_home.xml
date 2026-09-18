@@ -60,7 +60,7 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="4dp"
-                android:text="📂 本地"
+                android:text="本地"
                 android:backgroundTint="@color/card_bg"
                 android:textColor="@color/white" />
 
@@ -70,20 +70,51 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="▶ 默认源"
+                android:text="默认源"
                 android:backgroundTint="@color/card_bg"
                 android:textColor="@color/white" />
         </LinearLayout>
 
-        <TextView
+        <!-- 分段筛选：推荐 / 历史 / 收藏 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="4dp"
-            android:text="推荐视频"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_mode_recommend"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="推荐"
+                android:backgroundTint="@color/accent"
+                android:textColor="@color/black" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_mode_history"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:text="历史"
+                android:backgroundTint="@color/card_bg"
+                android:textColor="@color/white" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_mode_favorite"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="收藏"
+                android:backgroundTint="@color/card_bg"
+                android:textColor="@color/white" />
+        </LinearLayout>
 
         <!-- 空状态 -->
         <TextView
