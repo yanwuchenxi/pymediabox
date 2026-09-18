@@ -9,8 +9,6 @@ public class PymediaBoxApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (!Python.isInited()) {
-            Python.init(new AndroidPlatform(this));
-        }
+        Python.init(new AndroidPlatform(this));
     }
 }

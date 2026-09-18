@@ -89,9 +89,9 @@ public class MainActivity extends AppCompatActivity {
         Python py = Python.getInstance();
         try {
             // src/main/python/spider.py 会作为模块 spider 打进 APK，可直接 import
-            PyObject createSpider = py.getModule("spider").getAttr("create_spider");
+            PyObject createSpider = py.getModule("spider").callAttr("create_spider");
             PyObject spider = createSpider.call();
-            PyObject result = spider.getAttr("home_content").call();
+            PyObject result = spider.callAttr("home_content");
             String s = result != null ? result.toString() : "";
             PySpiderCache.last = s;
             Toast.makeText(this, "Python 爬虫响应长度=" + s.length(),
