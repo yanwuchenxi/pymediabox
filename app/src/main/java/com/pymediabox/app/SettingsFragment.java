@@ -208,19 +208,19 @@ public class SettingsFragment extends Fragment {
 
     private void refreshKernel(View v) {
         int sel = playerConfig.kernelIndex();
-        int tint = sel == 0 ? 0xFF4CC9F0 : 0xFF252A3A;
+        int tint = 0xFF4CC9F0;
         int unTint = 0xFF252A3A;
         int selText = 0xFF0D0F1A;
         int unText = 0xFFFFFFFF;
-        v.findViewById(R.id.btn_kernel_0).setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(sel == 0 ? tint : unTint));
-        v.findViewById(R.id.btn_kernel_0).setTextColor(sel == 0 ? selText : unText);
-        v.findViewById(R.id.btn_kernel_1).setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(sel == 1 ? tint : unTint));
-        v.findViewById(R.id.btn_kernel_1).setTextColor(sel == 1 ? selText : unText);
-        v.findViewById(R.id.btn_kernel_2).setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(sel == 2 ? tint : unTint));
-        v.findViewById(R.id.btn_kernel_2).setTextColor(sel == 2 ? selText : unText);
+        setKernelBtn((com.google.android.material.button.MaterialButton) v.findViewById(R.id.btn_kernel_0), sel == 0, tint, unTint, selText, unText);
+        setKernelBtn((com.google.android.material.button.MaterialButton) v.findViewById(R.id.btn_kernel_1), sel == 1, tint, unTint, selText, unText);
+        setKernelBtn((com.google.android.material.button.MaterialButton) v.findViewById(R.id.btn_kernel_2), sel == 2, tint, unTint, selText, unText);
+    }
+
+    private void setKernelBtn(com.google.android.material.button.MaterialButton b, boolean selected,
+                              int tint, int unTint, int selText, int unText) {
+        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(selected ? tint : unTint));
+        b.setTextColor(selected ? selText : unText);
     }
 
     private void bindChip(Chip chip, String m) {
