@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -12,6 +11,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- 爬虫操作卡片 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,44 +41,79 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
 
-                <Spinner
-                    android:id="@+id/spinner_category"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="16dp"
-                    android:background="@color/card_bg" />
-
+                <!-- 分类选择 + 执行 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_run_home"
+                    <Spinner
+                        android:id="@+id/spinner_category"
                         android:layout_width="0dp"
                         android:layout_height="44dp"
                         android:layout_weight="1"
-                        android:text="首页分类"
+                        android:background="@color/card_bg" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_run_home"
+                        android:layout_width="wrap_content"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="8dp"
+                        android:text="首页"
                         android:backgroundTint="@color/accent"
                         android:textColor="@color/black" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_run_detail"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="44dp"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="4dp"
                         android:text="详情"
                         android:backgroundTint="@color/card_bg"
                         android:textColor="@color/white" />
                 </LinearLayout>
 
+                <!-- 搜索 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_height="44dp"
+                        android:layout_weight="1"
+                        android:hint="搜索关键词"
+                        app:boxStrokeColor="@color/accent">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_search_spider"
+                            android:layout_width="match_parent"
+                            android:layout_height="44dp"
+                            android:inputType="text"
+                            android:singleLine="true"
+                            android:textColor="@color/white"
+                            android:textColorHint="@color/text_secondary" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_search_spider"
+                        android:layout_width="80dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="8dp"
+                        android:text="搜索"
+                        android:backgroundTint="@color/accent"
+                        android:textColor="@color/black" />
+                </LinearLayout>
+
+                <!-- 播放直链 -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/til_url"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:hint="视频直链 / 播放地址"
                     app:boxStrokeColor="@color/accent">
 
@@ -86,6 +121,8 @@
                         android:id="@+id/et_url"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
+                        android:inputType="textUri"
+                        android:singleLine="true"
                         android:textColor="@color/white"
                         android:textColorHint="@color/text_secondary" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -99,17 +136,61 @@
                     android:backgroundTint="@color/accent"
                     android:textColor="@color/black" />
 
+                <!-- 结果展示 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="查询结果"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+
                 <TextView
                     android:id="@+id/tv_result"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="6dp"
                     android:background="@color/card_bg"
                     android:fontFamily="monospace"
-                    android:maxLines="6"
                     android:padding="10dp"
+                    android:text="点击「首页」「详情」「搜索」按钮查看 Python 爬虫响应"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 历史卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="操作历史"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_history"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:fontFamily="monospace"
+                    android:maxLines="8"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="10sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
