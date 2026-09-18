@@ -2,6 +2,13 @@
 <resources>
     <string name="app_name">PyMediaBox</string>
     <string name="tab_home">首页</string>
-    <string name="tab_local">本地</string>
+    <string name="tab_spider">爬虫</string>
     <string name="tab_settings">设置</string>
+    <string name="hint_empty">暂无数据</string>
+    <string name="btn_reload">刷新</string>
+    <string name="lbl_version">版本</string>
+    <string name="lbl_default_url">默认播放源</string>
+    <string name="lbl_keep_screen">保持屏幕常亮</string>
+    <string name="lbl_about">关于</string>
+    <string name="about_body">PyMediaBox：参照 TVBoxOS + Chaquopy 设计，\n支持 Python 爬虫解析源与影音播放。</string>
 </resources>

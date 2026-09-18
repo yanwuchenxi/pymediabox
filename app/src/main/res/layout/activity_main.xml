@@ -1,47 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/black"
-    android:padding="20dp">
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_title"
+    <!-- 顶栏 -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="PyMediaBox"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:gravity="center"
-        android:padding="16dp" />
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="12dp">
 
-    <Button
-        android:id="@+id/btn_local"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="扫描本地媒体"
-        android:layout_marginTop="8dp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/btn_spider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="运行 Python 爬虫（spider.py）"
-        android:layout_marginTop="8dp" />
+        <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+    </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_url"
+    <!-- Tab 标签栏 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="播放在线示例"
-        android:layout_marginTop="8dp" />
+        android:layout_height="44dp"
+        android:background="@color/black"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@color/accent"
+        app:tabTextColor="@color/text_secondary" />
 
-    <TextView
+    <!-- 内容容器 -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="PyMediaBox 参考 TVBoxOS-Mobile 与 chaquopy 项目设计，支持 Python 爬虫解析源 + 本地/在线影音播放。"
-        android:textColor="#888"
-        android:textSize="12sp"
-        android:layout_marginTop="24dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 </LinearLayout>
