@@ -47,6 +47,10 @@ public class HomeFragment extends Fragment {
 
     private MaterialButton btnModeRecommend, btnModeHistory, btnModeFav;
     private TextView tvEmpty;
+    private ChannelManager channelManager;
+    private PlaybackInfoManager infoManager;
+    private RecyclerView recyclerChannels;
+    private ChannelAdapter channelAdapter;
 
     static class Item {
         String title, link, type;
@@ -73,6 +77,8 @@ public class HomeFragment extends Fragment {
 
     @Override public void onViewCreated(@NonNull View v, @Nullable Bundle s) {
         history = new HistoryManager(getContext());
+        channelManager = new ChannelManager(getContext());
+        infoManager = new PlaybackInfoManager(getContext());
 
         recycler = v.findViewById(R.id.recycler_home);
         swipe = v.findViewById(R.id.swipe_home);
@@ -106,7 +112,78 @@ public class HomeFragment extends Fragment {
         btnModeFav.setOnClickListener(x -> setMode(ViewMode.FAVORITE));
 
         swipe.setOnRefreshListener(() -> refresh());
+
+        // 信息卡：展示当前播放
+        bindInfoCard();
+        // 收藏频道横向列表
+        recyclerChannels = v.findViewById(R.id.recycler_channels);
+        recyclerChannels.setLayoutManager(
+                new androidx.recyclerview.widget.LinearLayoutManager(
+                        getContext(), androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
+        refreshChannels();
+        v.findViewById(R.id.btn_fav_channels).setOnClickListener(x ->
+                android.widget.Toast.makeText(getContext(), "已收藏 " +
+                        channelManager.favorites().size() + " 个频道",
+                        android.widget.Toast.LENGTH_SHORT).show());
+
         setMode(ViewMode.RECOMMEND);
+    }
+
+    private void bindInfoCard() {
+        String name = infoManager.nowName().isEmpty()
+                ? "频道名称" : infoManager.nowName();
+        String preview = infoManager.nowPreview();
+        ((TextView) requireView().findViewById(R.id.tv_info_name)).setText(name);
+        ((TextView) requireView().findViewById(R.id.tv_info_preview)).setText(preview);
+        ((TextView) requireView().findViewById(R.id.tv_info_ep)).setText(
+                String.valueOf(infoManager.nowEpisode()));
+        String last = infoManager.lastName();
+        ((TextView) requireView().findViewById(R.id.tv_info_meta)).setText(
+                last.isEmpty() ? "收藏频道" : "上次看到 " + last);
+    }
+
+    private void refreshChannels() {
+        List<ChannelManager.Channel> list = channelManager.all();
+        if (channelAdapter == null) {
+            channelAdapter = new ChannelAdapter(list);
+            recyclerChannels.setAdapter(channelAdapter);
+        } else {
+            channelAdapter.data = list;
+            channelAdapter.notifyDataSetChanged();
+        }
+    }
+
+    class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.VH> {
+        List<ChannelManager.Channel> data;
+        ChannelAdapter(List<ChannelManager.Channel> d) { this.data = d; }
+
+        @NonNull @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
+            return new VH(LayoutInflater.from(p.getContext())
+                    .inflate(R.layout.item_channel, p, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int pos) {
+            ChannelManager.Channel c = data.get(pos);
+            h.thumb.setText(c.name.isEmpty() ? "频" : c.name.substring(0, 1));
+            h.name.setText(c.name);
+            h.group.setText(c.group.isEmpty() ? c.url : c.group);
+            h.itemView.setOnClickListener(v ->
+                    openUrl(getContext(), c.url, c.name));
+        }
+
+        @Override public int getItemCount() { return data.size(); }
+
+        class VH extends RecyclerView.ViewHolder {
+            TextView thumb, name, group;
+            VH(View v) {
+                super(v);
+                thumb = v.findViewById(R.id.tv_channel_thumb);
+                name = v.findViewById(R.id.tv_channel_name);
+                group = v.findViewById(R.id.tv_channel_group);
+            }
+        }
     }
 
     private void setMode(ViewMode m) {

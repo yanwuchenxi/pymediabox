@@ -13,15 +13,21 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class SettingsFragment extends Fragment {
 
@@ -31,6 +37,7 @@ public class SettingsFragment extends Fragment {
     private RecyclerView recyclerSources;
     private SourceAdapter adapter;
     private String spiderMethod = "home";
+    private PlayerConfig playerConfig;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup c, @Nullable Bundle s) {
@@ -41,6 +48,7 @@ public class SettingsFragment extends Fragment {
         prefs = getContext().getSharedPreferences("pymediabox", Context.MODE_PRIVATE);
         sourceManager = new ApiSourceManager(getContext());
         resumeManager = new ResumeManager(getContext());
+        playerConfig = new PlayerConfig(getContext());
 
         // 版本
         TextView tvVer = v.findViewById(R.id.tv_settings_version);
@@ -101,19 +109,17 @@ public class SettingsFragment extends Fragment {
         recyclerSources.setLayoutManager(new LinearLayoutManager(getContext()));
         refreshSources();
 
-        // ===== Python 爬虫调试器（原爬虫页合并） =====
-        com.google.android.material.chip.ChipGroup chips = v.findViewById(R.id.chip_methods);
+        // ===== Python 爬虫调试器 =====
         bindChip(v.findViewById(R.id.chip_home), "home");
         bindChip(v.findViewById(R.id.chip_category), "category");
         bindChip(v.findViewById(R.id.chip_search), "search");
         bindChip(v.findViewById(R.id.chip_detail), "detail");
         bindChip(v.findViewById(R.id.chip_player), "player");
         v.findViewById(R.id.btn_run).setOnClickListener(x -> {
-            com.google.android.material.textfield.TextInputEditText etParam =
-                    v.findViewById(R.id.et_param);
+            TextInputEditText etParam = v.findViewById(R.id.et_param);
             String param = etParam.getText().toString().trim();
             String label = spiderLabel(spiderMethod) + (param.isEmpty() ? "" : " " + param);
-            ((android.widget.TextView) v.findViewById(R.id.tv_result))
+            ((TextView) v.findViewById(R.id.tv_result))
                     .setText(runSpider(spiderMethod, param));
             addSpiderHistory(label);
         });
@@ -130,9 +136,94 @@ public class SettingsFragment extends Fragment {
             Toast.makeText(getContext(), "播放历史、收藏与断点已清除",
                     Toast.LENGTH_SHORT).show();
         });
+
+        // ===== 播放器配置（内核 / 缩放 / 超时 / 线程） =====
+        bindPlayerConfig(v);
     }
 
-    private void bindChip(com.google.android.material.chip.Chip chip, String m) {
+    private void bindPlayerConfig(View v) {
+        // 内核 3 选 1
+        MaterialButton k0 = v.findViewById(R.id.btn_kernel_0);
+        MaterialButton k1 = v.findViewById(R.id.btn_kernel_1);
+        MaterialButton k2 = v.findViewById(R.id.btn_kernel_2);
+        k0.setOnClickListener(x -> { playerConfig.setKernel(0); refreshKernel(v); });
+        k1.setOnClickListener(x -> { playerConfig.setKernel(1); refreshKernel(v); });
+        k2.setOnClickListener(x -> { playerConfig.setKernel(2); refreshKernel(v); });
+        refreshKernel(v);
+
+        // 画面缩放（ChipGroup 单行多列）
+        ChipGroup scaleGroup = v.findViewById(R.id.chip_scale);
+        int scaleIdx = playerConfig.scaleIndex();
+        int chipId = scaleGroup.getChildCount();
+        for (int i = 0; i < chipId; i++) {
+            final int idx = i;
+            Chip chip = (Chip) scaleGroup.getChildAt(i);
+            chip.setChecked(i == scaleIdx);
+            chip.setOnCheckedChangeListener((c, on) -> {
+                if (on) {
+                    playerConfig.setScale(idx);
+                    for (int j = 0; j < scaleGroup.getChildCount(); j++)
+                        if (j != idx) ((Chip) scaleGroup.getChildAt(j)).setChecked(false);
+                }
+            });
+        }
+
+        // 超时换源（ChipGroup）
+        ChipGroup timeoutGroup = v.findViewById(R.id.chip_timeout);
+        int[] timeoutVals = {5, 10, 20, 30};
+        for (int i = 0; i < timeoutGroup.getChildCount(); i++) {
+            final int val = timeoutVals[i];
+            Chip chip = (Chip) timeoutGroup.getChildAt(i);
+            chip.setChecked(playerConfig.timeoutSec() == val);
+            chip.setOnCheckedChangeListener((c, on) -> {
+                if (on) {
+                    playerConfig.setTimeout(val);
+                    for (int j = 0; j < timeoutGroup.getChildCount(); j++)
+                        if (j != i) ((Chip) timeoutGroup.getChildAt(j)).setChecked(false);
+                }
+            });
+        }
+
+        // 高级设置：搜索线程
+        TextInputEditText etThreads = v.findViewById(R.id.et_threads);
+        etThreads.setText(String.valueOf(playerConfig.searchThreads()));
+        v.findViewById(R.id.btn_save_config).setOnClickListener(x -> {
+            try {
+                int t = Integer.parseInt(etThreads.getText().toString().trim());
+                playerConfig.setSearchThreads(t);
+                Toast.makeText(getContext(), "已保存，线程=" + t, Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "线程数无效", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 恢复默认
+        v.findViewById(R.id.btn_reset_config).setOnClickListener(x -> {
+            playerConfig.reset();
+            Toast.makeText(getContext(), "已恢复默认", Toast.LENGTH_SHORT).show();
+            // 重新绑定
+            bindPlayerConfig(x.getRootView());
+        });
+    }
+
+    private void refreshKernel(View v) {
+        int sel = playerConfig.kernelIndex();
+        int tint = sel == 0 ? 0xFF4CC9F0 : 0xFF252A3A;
+        int unTint = 0xFF252A3A;
+        int selText = 0xFF0D0F1A;
+        int unText = 0xFFFFFFFF;
+        v.findViewById(R.id.btn_kernel_0).setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(sel == 0 ? tint : unTint));
+        v.findViewById(R.id.btn_kernel_0).setTextColor(sel == 0 ? selText : unText);
+        v.findViewById(R.id.btn_kernel_1).setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(sel == 1 ? tint : unTint));
+        v.findViewById(R.id.btn_kernel_1).setTextColor(sel == 1 ? selText : unText);
+        v.findViewById(R.id.btn_kernel_2).setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(sel == 2 ? tint : unTint));
+        v.findViewById(R.id.btn_kernel_2).setTextColor(sel == 2 ? selText : unText);
+    }
+
+    private void bindChip(Chip chip, String m) {
         chip.setOnCheckedChangeListener((c, checked) -> { if (checked) spiderMethod = m; });
     }
 
@@ -147,8 +238,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private void addSpiderHistory(String action) {
-        String ts = new java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.US)
-                .format(new java.util.Date());
+        String ts = new SimpleDateFormat("HH:mm:ss", Locale.US).format(new Date());
         String line = "· " + ts + " " + action + "\n";
         String old = prefs.getString("spider_history", "");
         prefs.edit().putString("spider_history", line + old).apply();
@@ -156,10 +246,9 @@ public class SettingsFragment extends Fragment {
 
     private String runSpider(String m, String param) {
         try {
-            com.chaquo.python.Python py = com.chaquo.python.Python.getInstance();
-            com.chaquo.python.PyObject spider =
-                    py.getModule("spider").callAttr("create_spider").call();
-            com.chaquo.python.PyObject result;
+            Python py = Python.getInstance();
+            PyObject spider = py.getModule("spider").callAttr("create_spider").call();
+            PyObject result;
             switch (m) {
                 case "category":
                     result = spider.callAttr("category_content",

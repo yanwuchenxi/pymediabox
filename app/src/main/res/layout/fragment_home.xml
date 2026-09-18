@@ -11,6 +11,171 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <!-- 视频区（黑屏 + 信息卡） -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:background="#000000">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="bottom">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="#CC10141F"
+                    android:padding="14dp">
+
+                    <!-- 频道图标 -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        app:cardBackgroundColor="@color/card_bg_2"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="📺"
+                            android:textSize="28sp" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- 名称 | 预告 | 集数 -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="14dp"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/tv_info_name"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="频道名称"
+                                android:textColor="@color/white"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="·"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:id="@+id/tv_info_preview"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:text="暂时没有播放预告"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tv_info_meta"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="收藏频道"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <!-- 集数 + 更多 -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="8dp">
+
+                        <TextView
+                            android:id="@+id/tv_info_ep"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="⋮"
+                            android:textColor="@color/white"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- 收藏频道行 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="收藏频道"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:paddingStart="10dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_fav_channels"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="查看全部"
+                android:backgroundTint="@color/card_bg"
+                android:textColor="@color/white"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="8dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_channels"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </HorizontalScrollView>
+
         <!-- 搜索栏 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,36 +210,6 @@
                 android:textColor="@color/black" />
         </LinearLayout>
 
-        <!-- 快捷功能行 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingBottom="8dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_scan_local"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:text="本地"
-                android:backgroundTint="@color/card_bg"
-                android:textColor="@color/white" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_default"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:text="默认源"
-                android:backgroundTint="@color/card_bg"
-                android:textColor="@color/white" />
-        </LinearLayout>
-
         <!-- 分段筛选：推荐 / 历史 / 收藏 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -101,7 +236,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="4dp"
-                android:text="历史"
+                android:text="观看历史"
                 android:backgroundTint="@color/card_bg"
                 android:textColor="@color/white" />
 
@@ -111,7 +246,7 @@
                 android:layout_height="36dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="收藏"
+                android:text="影视收藏"
                 android:backgroundTint="@color/card_bg"
                 android:textColor="@color/white" />
         </LinearLayout>

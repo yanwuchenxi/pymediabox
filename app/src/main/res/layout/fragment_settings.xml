@@ -149,6 +149,13 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- 播放器配置（内嵌卡片） -->
+        <include
+            android:id="@+id/include_player_config"
+            layout="@layout/card_player_config"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <!-- Python 爬虫调试器（原爬虫页功能合并） -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"

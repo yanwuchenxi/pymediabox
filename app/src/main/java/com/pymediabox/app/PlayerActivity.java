@@ -39,18 +39,25 @@ public class PlayerActivity extends AppCompatActivity {
     private ResumeManager resume;
     private MaterialButton btnFavorite, btnNext;
     private String curUrl;
+    private PlaybackInfoManager infoManager;
+    private PlayerConfig config;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         history = new HistoryManager(this);
         resume = new ResumeManager(this);
+        infoManager = new PlaybackInfoManager(this);
+        config = new PlayerConfig(this);
 
         String url = getIntent().getStringExtra("url");
         String title = getIntent().getStringExtra("title");
         curUrl = url;
         if (url != null && !url.isEmpty()) {
             history.addHistory(title != null ? title : url, url, "在线");
+            // 信息卡：当前播放
+            infoManager.setNow(title != null ? title : url, "暂时没有播放预告", 1);
+            infoManager.setLast(title != null ? title : url);
         }
 
         // 标题栏
