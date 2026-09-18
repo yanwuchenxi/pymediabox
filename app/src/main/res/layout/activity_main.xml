@@ -48,22 +48,13 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Tab 标签栏 -->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@color/black"
-            app:tabMode="fixed"
-            app:tabSelectedTextColor="@color/accent"
-            app:tabTextColor="@color/text_secondary" />
-
         <!-- 内容容器 -->
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:paddingBottom="64dp" />
     </LinearLayout>
 
     <!-- 底部导航（OK影视 / 蜂蜜式 4 Tab） -->

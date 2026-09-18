@@ -55,17 +55,7 @@ def top_bar(d, active_tab):
     rrect(d, (W-40-sw, 80, W-40, 80+48), 12, CARD)
     d.text((W-40-sw+15, 92), "源：演示", font=f_xs, fill=ACCENT)
     d.line((0, 140, W, 140), fill=CARD, width=2)
-    # Tab
-    tabs = ["首页","设置"]
-    tab_w = W//2
-    for i,t in enumerate(tabs):
-        cx=i*tab_w
-        active=(i==active_tab)
-        if active:
-            d.rectangle((cx+tab_w//2-40, 166, cx+tab_w//2+40, 176), fill=ACCENT)
-        d.text((cx+tab_w//2-tw(t,f_tab)//2, 148), t, font=f_tab,
-               fill=ACCENT if active else SECOND)
-    return 176
+    return 148
 
 def ic_home(d, cx, cy, r, color):
     d.polygon([(cx-r, cy-r*0.1),(cx, cy-r*0.9),(cx+r, cy-r*0.1)], outline=color, width=4)
@@ -234,7 +224,57 @@ def page_settings():
     img.save(os.path.join(OUT, "02_settings.png"))
     print("settings ok")
 
+# =========================================================
+# 搜索页
+# =========================================================
+def page_search():
+    img, d = new_page()
+    status_bar(d)
+    y = top_bar(d, 1)
+    d.text((40, y+16), "搜索", font=f_sec, fill=WHITE)
+    y += 70
+    rrect(d, (24, y, W-24-120, y+64), 14, CARD, outline=ACCENT_D, width=2)
+    d.text((48, y+20), "输入影视名称", font=f_card, fill=SECOND)
+    rrect(d, (W-120, y, W-24, y+64), 14, ACCENT)
+    d.text((W-120+30, y+18), "搜索", font=f_card, fill=BLACK)
+    y += 64 + 24
+    d.text((24, y), "历史搜索", font=f_xs, fill=SECOND)
+    d.text((W-100, y), "清除", font=f_xs, fill=SECOND)
+    y += 40
+    for i,w in enumerate(["复仇者联盟","唐探1900","战狼"]):
+        rrect(d, (24, y, W-24, y+56), 12, CARD)
+        d.text((48, y+16), w, font=f_card, fill=WHITE)
+        y += 56 + 10
+    bottom_nav(d, 1)
+    img.save(os.path.join(OUT, "03_search.png"))
+    print("search ok")
+
+# =========================================================
+# 历史/收藏页
+# =========================================================
+def page_history():
+    img, d = new_page()
+    status_bar(d)
+    y = top_bar(d, 2)
+    d.text((40, y+16), "历史 / 收藏", font=f_sec, fill=WHITE)
+    y += 64
+    rrect(d, (24, y, W-24, y+56), 12, CARD)
+    d.text((48, y+18), "搜索历史记录", font=f_card, fill=SECOND)
+    y += 56 + 20
+    hw = (W-48-12)//2
+    rrect(d, (24, y, 24+hw, y+56), 12, ACCENT)
+    d.text((24+hw//2-tw("观看历史",f_card)//2, y+14), "观看历史", font=f_card, fill=BLACK)
+    rrect(d, (24+hw+12, y, 24+hw+12+hw, y+56), 12, CARD, outline=CARD2, width=2)
+    d.text((24+hw+12+hw//2-tw("影视收藏",f_card)//2, y+14), "影视收藏", font=f_card, fill=WHITE)
+    y += 56 + 20
+    d.text((W//2-tw("没有更多数据",f_card)//2, y+80), "没有更多数据", font=f_card, fill=SECOND)
+    bottom_nav(d, 2)
+    img.save(os.path.join(OUT, "04_history.png"))
+    print("history ok")
+
 if __name__ == "__main__":
     page_home()
+    page_search()
+    page_history()
     page_settings()
     print("done ->", OUT)

@@ -41,13 +41,10 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
 
-    public enum HistMode { HISTORY, FAVORITE }
-
     private SwipeRefreshLayout swipe;
-    private RecyclerView recyclerVideos, recyclerClasses, recyclerHistory;
+    private RecyclerView recyclerVideos, recyclerClasses;
     private VideoAdapter videoAdapter;
     private ClassAdapter classAdapter;
-    private HistoryAdapter historyAdapter;
 
     private HistoryManager history;
     private ApiSourceManager api;
@@ -57,8 +54,6 @@ public class HomeFragment extends Fragment {
     private int activePage = 1;
 
     private List<HistoryManager.HistoryItem> historyItems = new ArrayList<>();
-    private HistMode histMode = HistMode.HISTORY;
-    private MaterialButton btnHist, btnFav;
 
     static class Video {
         String title, link, tag, duration;
@@ -98,16 +93,6 @@ public class HomeFragment extends Fragment {
         recyclerClasses = v.findViewById(R.id.recycler_classes);
         recyclerClasses.setLayoutManager(
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        recyclerHistory = v.findViewById(R.id.recycler_history);
-        recyclerHistory.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-
-        // 历史 / 收藏 分段
-        btnHist = v.findViewById(R.id.btn_mode_history);
-        btnFav = v.findViewById(R.id.btn_mode_favorite);
-        btnHist.setOnClickListener(x -> setHistMode(HistMode.HISTORY));
-        btnFav.setOnClickListener(x -> setHistMode(HistMode.FAVORITE));
-
         // 快捷入口
         v.findViewById(R.id.btn_scan_local).setOnClickListener(x -> requestLocalPermission());
         v.findViewById(R.id.btn_default).setOnClickListener(x -> {
@@ -118,7 +103,6 @@ public class HomeFragment extends Fragment {
         });
 
         loadClasses();
-        setHistMode(HistMode.HISTORY);
     }
 
     // ---------- 分类标签（当前源） ----------
@@ -248,63 +232,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // ---------- 历史 / 收藏 ----------
-    private void setHistMode(HistMode m) {
-        histMode = m;
-        int sel = 0xFF4CC9F0, un = 0xFF1E2130;
-        int selText = 0xFF0D0F1A, unText = 0xFFFFFFFF;
-        setSegBtn(btnHist, m == HistMode.HISTORY, sel, un, selText, unText);
-        setSegBtn(btnFav, m == HistMode.FAVORITE, sel, un, selText, unText);
-
-        historyItems = m == HistMode.FAVORITE ? history.getFavorites() : history.getHistory();
-        recyclerHistory.setVisibility(historyItems.isEmpty() ? View.GONE : View.VISIBLE);
-        if (historyAdapter == null) {
-            historyAdapter = new HistoryAdapter(historyItems);
-            recyclerHistory.setAdapter(historyAdapter);
-        } else {
-            historyAdapter.data = historyItems;
-            historyAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private void setSegBtn(MaterialButton b, boolean selected,
-                           int sel, int un, int selText, int unText) {
-        b.setBackgroundTintList(ColorStateList.valueOf(selected ? sel : un));
-        b.setTextColor(selected ? selText : unText);
-    }
-
-    class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.VH> {
-        List<HistoryManager.HistoryItem> data;
-        HistoryAdapter(List<HistoryManager.HistoryItem> d) { this.data = d; }
-
-        @NonNull @Override
-        public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
-            return new VH(LayoutInflater.from(p.getContext())
-                    .inflate(R.layout.item_history, p, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull VH h, int pos) {
-            HistoryManager.HistoryItem it = data.get(pos);
-            h.cover.setText(it.title.isEmpty() ? "影" : it.title.substring(0, 1));
-            h.title.setText(it.title);
-            h.meta.setText(histMode == HistMode.FAVORITE
-                    ? "收藏" : it.type + (it.time.isEmpty() ? "" : " · " + it.time));
-            h.itemView.setOnClickListener(v -> openUrl(getContext(), it.url, it.title));
-        }
-
-        @Override public int getItemCount() { return data.size(); }
-
-        class VH extends RecyclerView.ViewHolder {
-            TextView cover, title, meta;
-            VH(View v) {
-                super(v);
-                cover = v.findViewById(R.id.tv_hist_cover);
-                title = v.findViewById(R.id.tv_hist_title);
-                meta = v.findViewById(R.id.tv_hist_meta);
-            }
-        }
-    }
 
     // ---------- 本地媒体 ----------
     private void requestLocalPermission() {

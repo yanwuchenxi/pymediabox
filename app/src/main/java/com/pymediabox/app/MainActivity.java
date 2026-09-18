@@ -1,20 +1,22 @@
 package com.pymediabox.app;
 
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.google.android.material.tabs.TabLayout;
-
+/**
+ * 主框架：顶栏（Logo + 源选择）+ 内容容器 + 底部 4 导航。
+ * 统一导航到底部，顶部不再有 Tab，消除重复导航。
+ * 4 个页面：首页 / 搜索 / 历史收藏 / 设置
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private TabLayout tabLayout;
     private View[] navs;
     private int current = 0;
 
@@ -29,54 +31,47 @@ public class MainActivity extends AppCompatActivity {
                     .getPackageInfo(getPackageName(), 0).versionName);
         } catch (Exception ignored) { }
 
-        // 顶部 2 Tab（首页/设置）+ 底部 4 导航（首页/搜索/历史收藏/设置）
-        tabLayout = findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_home));
-        tabLayout.addTab(tabLayout.newTab().setText(R.string.tab_settings));
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override public void onTabSelected(TabLayout.Tab tab) {
-                selectTab(tab.getPosition());
-                syncBottomNav();
-            }
-            @Override public void onTabUnselected(TabLayout.Tab tab) { }
-            @Override public void onTabReselected(TabLayout.Tab tab) { }
-        });
-
         navs = new View[]{
                 findViewById(R.id.bnav_home),
                 findViewById(R.id.bnav_search),
                 findViewById(R.id.bnav_fav),
                 findViewById(R.id.bnav_settings),
         };
-        navs[0].setOnClickListener(v -> { tabLayout.getTabAt(0).select(); });
-        navs[1].setOnClickListener(v -> {
-            Intent i = new Intent(this, PlayerActivity.class);
-            i.putExtra("url", "https://example.com?q=");
-            i.putExtra("title", "搜索");
-            startActivity(i);
-        });
-        navs[2].setOnClickListener(v -> selectTab(0)); // 历史/收藏 在首页分段区
-        navs[3].setOnClickListener(v -> tabLayout.getTabAt(1).select());
+        navs[0].setOnClickListener(v -> openPage(0));
+        navs[1].setOnClickListener(v -> openPage(1));
+        navs[2].setOnClickListener(v -> openPage(2));
+        navs[3].setOnClickListener(v -> openPage(3));
 
-        selectTab(0);
-        syncBottomNav();
+        openPage(0);
         handleIntent(getIntent());
     }
 
-    private void selectTab(int pos) {
+    private void openPage(int pos) {
+        if (pos == current) return;
         current = pos;
-        Fragment f = (pos == 1) ? new SettingsFragment() : new HomeFragment();
-        FragmentTransaction t = getSupportFragmentManager().beginTransaction();
-        t.replace(R.id.fragment_container, f);
-        t.commit();
+        Fragment f;
+        switch (pos) {
+            case 1: f = new SearchFragment(); break;
+            case 2: f = new HistoryFragment(); break;
+            case 3: f = new SettingsFragment(); break;
+            default: f = new HomeFragment(); break;
+        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, f).commit();
+        syncBottomNav();
     }
 
     private void syncBottomNav() {
-        int active = (current == 0) ? 0 : 3;
+        String[] labels = {"首页", "搜索", "历史/收藏", "设置"};
         for (int i = 0; i < navs.length; i++) {
-            TextView label = (TextView) ((android.view.ViewGroup) navs[i]).getChildAt(1);
-            int icon = i;
-            label.setTextColor(i == active ? 0xFF4CC9F0 : 0xFF8A8FA8);
+            LinearLayout ll = (LinearLayout) navs[i];
+            int n = ll.getChildCount();
+            if (n < 2) continue;
+            TextView label = (TextView) ll.getChildAt(n - 1);
+            int color = (i == current) ? 0xFF4CC9F0 : 0xFF8A8FA8;
+            label.setTextColor(color);
+            TextView icon = (TextView) ll.getChildAt(0);
+            icon.setTextColor(color);
         }
     }
 
