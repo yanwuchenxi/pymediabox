@@ -24,13 +24,11 @@ jobs:
         with:
           python-version: '3.11'
 
-      # ---- 单元验证 Python 爬虫 ----
       - name: Run Python spider tests
         run: |
-          cd app/src/main/assets/python
+          cd app/src/main/python
           python -m unittest -v test_spider.py
 
-      # ---- 构建 Android 应用 ----
       - name: Grant wrapper script permission
         run: chmod +x gradlew
 

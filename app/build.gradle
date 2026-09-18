@@ -61,7 +61,6 @@ python {
         install 'beautifulsoup4'
         install 'lxml'
         install 'pycryptodome'
-        install 'jsonpath'
         install 'cachetools'
         install 'pyquery'
     }
