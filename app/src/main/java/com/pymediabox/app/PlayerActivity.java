@@ -77,10 +77,12 @@ public class PlayerActivity extends AppCompatActivity {
         row.setPadding(16, 0, 16, 0);
         row.addView(tvProgress, new LinearLayout.LayoutParams(0, -2, 1));
         row.addView(btnPlayPause, new LinearLayout.LayoutParams(-2, -2));
-        row.addView(btnReplay, new LinearLayout.LayoutParams(-2, -2, 0, 0)
-                .setMargins(8, 0, 0, 0));
-        row.addView(btnFullscreen, new LinearLayout.LayoutParams(-2, -2, 0, 0)
-                .setMargins(8, 0, 0, 0));
+        LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(-2, -2);
+        rl.setMargins(8, 0, 0, 0);
+        row.addView(btnReplay, rl);
+        LinearLayout.LayoutParams fl = new LinearLayout.LayoutParams(-2, -2);
+        fl.setMargins(8, 0, 0, 0);
+        row.addView(btnFullscreen, fl);
 
         bottomBar = new LinearLayout(this);
         bottomBar.setOrientation(LinearLayout.VERTICAL);
