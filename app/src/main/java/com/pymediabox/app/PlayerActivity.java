@@ -34,6 +34,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     private HistoryManager history;
     private MaterialButton btnFavorite;
+    private MaterialButton btnNext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,10 +109,40 @@ public class PlayerActivity extends AppCompatActivity {
         bottomBar.setOrientation(LinearLayout.VERTICAL);
         bottomBar.setPadding(16, 12, 16, 16);
         bottomBar.setBackgroundColor(0x330D0F1A);
+        btnNext = new MaterialButton(this);
+        btnNext.setText("⏭ 下一个");
+        btnNext.setAllCaps(false);
+        btnNext.setElevation(0);
+        btnNext.setOnClickListener(v -> {
+            // 从播放历史取下一条
+            java.util.List<HistoryManager.HistoryItem> h = history.getHistory();
+            int idx = -1;
+            for (int i = 0; i < h.size(); i++)
+                if (h.get(i).url.equals(finalUrl)) { idx = i; break; }
+            if (idx < h.size() - 1) {
+                HistoryManager.HistoryItem next = h.get(idx + 1);
+                Intent i = new Intent(this, PlayerActivity.class);
+                i.putExtra("url", next.url);
+                i.putExtra("title", next.title);
+                startActivity(i);
+            } else if (!h.isEmpty()) {
+                HistoryManager.HistoryItem next = h.get(0);
+                Intent i = new Intent(this, PlayerActivity.class);
+                i.putExtra("url", next.url);
+                i.putExtra("title", next.title);
+                startActivity(i);
+            } else {
+                android.widget.Toast.makeText(this, "没有更多视频", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+
         LinearLayout favRow = new LinearLayout(this);
         favRow.setGravity(android.view.Gravity.END);
         favRow.setPadding(0, 0, 16, 0);
-        favRow.addView(btnFavorite, new LinearLayout.LayoutParams(-2, -2));
+        favRow.addView(btnNext, new LinearLayout.LayoutParams(-2, -2));
+        LinearLayout.LayoutParams fvlp = new LinearLayout.LayoutParams(-2, -2);
+        fvlp.setMargins(8, 0, 0, 0);
+        favRow.addView(btnFavorite, fvlp);
         bottomBar.addView(favRow, new LinearLayout.LayoutParams(-1, -2));
         bottomBar.addView(progress, new LinearLayout.LayoutParams(-1, -2));
         bottomBar.addView(row);
