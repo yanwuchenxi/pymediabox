@@ -78,7 +78,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
                     android:layout_marginTop="10dp"
-                    android:text="▶ 播放默认源"
+                    android:text="播放默认源"
                     android:backgroundTint="@color/accent"
                     android:textColor="@color/black" />
             </LinearLayout>
@@ -111,7 +111,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="TVBox 式 JSON 接口源，首页分类列表即来自这里"
+                    android:text="TVBox 式 JSON 接口源，首页分类瀑布流即来自这里"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
 
@@ -141,6 +141,16 @@
                     android:backgroundTint="@color/accent"
                     android:textColor="@color/black" />
 
+                <!-- 蜂蜜源一键导入 -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_import_fengmi"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:text="🍯 导入蜂蜜源（示例配置）"
+                    android:backgroundTint="@color/card_bg_2"
+                    android:textColor="@color/white" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_sources"
                     android:layout_width="match_parent"
@@ -149,12 +159,47 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 播放器配置（内嵌卡片） -->
-        <include
-            android:id="@+id/include_player_config"
-            layout="@layout/card_player_config"
+        <!-- 本地媒体 -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="本地媒体"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_scan_local"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="12dp"
+                    android:text="扫描本地视频"
+                    android:backgroundTint="@color/black"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="视频请放到 /sdcard/Android/data/com.pymediabox.app/files/Movies"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Python 爬虫调试器（原爬虫页功能合并） -->
         <com.google.android.material.card.MaterialCardView
@@ -287,47 +332,13 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 本地媒体 -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- 播放器配置（内嵌卡片） -->
+        <include
+            android:id="@+id/include_player_config"
+            layout="@layout/card_player_config"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@color/card_bg"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="本地媒体"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_scan_local"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="12dp"
-                    android:text="📂 扫描本地视频"
-                    android:backgroundTint="@color/black"
-                    android:textColor="@color/white" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="视频请放到 /sdcard/Android/data/com.pymediabox.app/files/Movies"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_marginTop="12dp" />
 
         <!-- 数据管理 -->
         <com.google.android.material.card.MaterialCardView

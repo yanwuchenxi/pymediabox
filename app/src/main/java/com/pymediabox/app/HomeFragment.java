@@ -31,8 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 首页：搜索 + 快捷入口 + 分段筛选（推荐 / 历史 / 收藏）
- * 原队列页功能已合并到这里。
+ * 首页（蜂蜜 / 影视仓 式）：
+ * - 顶部分类瀑布流：视频源选择（弹窗）+ 分类标签 + 该源该分类下的视频列表
+ * - 收藏频道横向卡片
+ * - 分段筛选：推荐 / 观看历史 / 影视收藏
+ * - 搜索 + 本地 / 默认源快捷入口
  */
 public class HomeFragment extends Fragment {
 
@@ -45,12 +48,21 @@ public class HomeFragment extends Fragment {
     private ViewMode mode = ViewMode.RECOMMEND;
     private HistoryManager history;
 
-    private MaterialButton btnModeRecommend, btnModeHistory, btnModeFav;
+    private MaterialButton btnModeRecommend, btnModeHistory, btnModeFav, btnSource;
     private TextView tvEmpty;
     private ChannelManager channelManager;
     private PlaybackInfoManager infoManager;
     private RecyclerView recyclerChannels;
     private ChannelAdapter channelAdapter;
+
+    // 蜂蜜式分类瀑布流
+    private ApiSourceManager api;
+    private ApiSourceManager.Source activeSource;
+    private RecyclerView recyclerClasses;
+    private ClassAdapter classAdapter;
+    private List<String> classNames = new ArrayList<>();
+    private String activeClass = "";
+    private int activePage = 1;
 
     static class Item {
         String title, link, type;
@@ -79,6 +91,7 @@ public class HomeFragment extends Fragment {
         history = new HistoryManager(getContext());
         channelManager = new ChannelManager(getContext());
         infoManager = new PlaybackInfoManager(getContext());
+        api = new ApiSourceManager(getContext());
 
         recycler = v.findViewById(R.id.recycler_home);
         swipe = v.findViewById(R.id.swipe_home);
@@ -115,31 +128,141 @@ public class HomeFragment extends Fragment {
 
         // 信息卡：展示当前播放
         bindInfoCard();
+
         // 收藏频道横向列表
         recyclerChannels = v.findViewById(R.id.recycler_channels);
         recyclerChannels.setLayoutManager(
-                new androidx.recyclerview.widget.LinearLayoutManager(
-                        getContext(), androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
+                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         refreshChannels();
         v.findViewById(R.id.btn_fav_channels).setOnClickListener(x ->
-                android.widget.Toast.makeText(getContext(), "已收藏 " +
-                        channelManager.favorites().size() + " 个频道",
-                        android.widget.Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "已收藏 " + channelManager.favorites().size() + " 个频道",
+                        Toast.LENGTH_SHORT).show());
+
+        // 蜂蜜式分类瀑布流：源选择 + 分类标签 + 列表
+        setupClassView(v);
 
         setMode(ViewMode.RECOMMEND);
     }
 
+    // ---------- 蜂蜜式分类瀑布流 ----------
+    private void setupClassView(View v) {
+        // 源选择按钮
+        btnSource = v.findViewById(R.id.btn_source);
+        refreshSourceBtn();
+        btnSource.setOnClickListener(x -> showSourceDialog());
+
+        // 分类标签横排
+        recyclerClasses = v.findViewById(R.id.recycler_classes);
+        recyclerClasses.setLayoutManager(
+                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        loadClasses();
+    }
+
+    private void loadClasses() {
+        activeSource = api.sources().get(0);
+        refreshSourceBtn();
+        classNames = api.homeClasses(activeSource);
+        if (classNames == null) classNames = new ArrayList<>();
+        activeClass = classNames.isEmpty() ? "" : classNames.get(0);
+        if (classAdapter == null) {
+            classAdapter = new ClassAdapter(classNames);
+            recyclerClasses.setAdapter(classAdapter);
+        } else {
+            classAdapter.data = classNames;
+            classAdapter.notifyDataSetChanged();
+        }
+        loadCategory();
+    }
+
+    private void loadCategory() {
+        activePage = 1;
+        List<String[]> data = api.categoryItems(activeSource, activeClass, 1);
+        if (data == null) data = new ArrayList<>();
+        List<String[]> list = data;
+        if (list.isEmpty()) {
+            items.clear();
+            items.add(new Item("该分类暂无内容（演示源仅示例）", "", "分类"));
+        } else {
+            items.clear();
+            for (String[] row : list)
+                items.add(new Item(row[0], row[1], "· " + activeClass));
+        }
+        tvEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+        if (adapter == null) {
+            adapter = new Adapter(items);
+            recycler.setAdapter(adapter);
+        } else {
+            adapter.data = items;
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    private void refreshSourceBtn() {
+        if (activeSource != null)
+            btnSource.setText("源：" + activeSource.name);
+    }
+
+    private void showSourceDialog() {
+        final List<ApiSourceManager.Source> srcs = api.sources();
+        String[] names = new String[srcs.size()];
+        for (int i = 0; i < srcs.size(); i++) names[i] = srcs.get(i).name;
+        new android.app.AlertDialog.Builder(getContext())
+                .setTitle("选择视频源")
+                .setSingleChoiceItems(names, 0,
+                        (d, which) -> {
+                            activeSource = srcs.get(which);
+                            refreshSourceBtn();
+                            loadClasses();
+                            d.dismiss();
+                        })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.VH> {
+        List<String> data;
+        ClassAdapter(List<String> d) { this.data = d; }
+
+        @NonNull @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
+            return new VH(LayoutInflater.from(p.getContext())
+                    .inflate(R.layout.item_class_tag, p, false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int pos) {
+            String c = data.get(pos);
+            h.tv.setText(c);
+            boolean sel = c.equals(activeClass);
+            int bg = sel ? 0xFF4CC9F0 : 0xFF1E2130;
+            int fg = sel ? 0xFF0D0F1A : 0xFF8A8FA8;
+            ((com.google.android.material.card.MaterialCardView) h.itemView)
+                    .setCardBackgroundColor(bg);
+            h.tv.setTextColor(fg);
+            h.itemView.setOnClickListener(v -> {
+                activeClass = c;
+                notifyItemRangeChanged(0, data.size());
+                loadCategory();
+            });
+        }
+
+        @Override public int getItemCount() { return data.size(); }
+
+        class VH extends RecyclerView.ViewHolder {
+            TextView tv;
+            VH(View v) { super(v); tv = v.findViewById(R.id.tv_class_name); }
+        }
+    }
+
+    // ---------- 信息卡 / 频道 / 分段 ----------
     private void bindInfoCard() {
-        String name = infoManager.nowName().isEmpty()
-                ? "频道名称" : infoManager.nowName();
-        String preview = infoManager.nowPreview();
+        String name = infoManager.nowName().isEmpty() ? "频道名称" : infoManager.nowName();
         ((TextView) requireView().findViewById(R.id.tv_info_name)).setText(name);
-        ((TextView) requireView().findViewById(R.id.tv_info_preview)).setText(preview);
-        ((TextView) requireView().findViewById(R.id.tv_info_ep)).setText(
-                String.valueOf(infoManager.nowEpisode()));
+        ((TextView) requireView().findViewById(R.id.tv_info_preview)).setText(infoManager.nowPreview());
+        ((TextView) requireView().findViewById(R.id.tv_info_ep)).setText(String.valueOf(infoManager.nowEpisode()));
         String last = infoManager.lastName();
-        ((TextView) requireView().findViewById(R.id.tv_info_meta)).setText(
-                last.isEmpty() ? "收藏频道" : "上次看到 " + last);
+        ((TextView) requireView().findViewById(R.id.tv_info_meta))
+                .setText(last.isEmpty() ? "收藏频道" : "上次看到 " + last);
     }
 
     private void refreshChannels() {
@@ -159,8 +282,7 @@ public class HomeFragment extends Fragment {
 
         @NonNull @Override
         public VH onCreateViewHolder(@NonNull ViewGroup p, int t) {
-            return new VH(LayoutInflater.from(p.getContext())
-                    .inflate(R.layout.item_channel, p, false));
+            return new VH(LayoutInflater.from(p.getContext()).inflate(R.layout.item_channel, p, false));
         }
 
         @Override
@@ -169,8 +291,7 @@ public class HomeFragment extends Fragment {
             h.thumb.setText(c.name.isEmpty() ? "频" : c.name.substring(0, 1));
             h.name.setText(c.name);
             h.group.setText(c.group.isEmpty() ? c.url : c.group);
-            h.itemView.setOnClickListener(v ->
-                    openUrl(getContext(), c.url, c.name));
+            h.itemView.setOnClickListener(v -> openUrl(getContext(), c.url, c.name));
         }
 
         @Override public int getItemCount() { return data.size(); }
@@ -238,14 +359,6 @@ public class HomeFragment extends Fragment {
                 "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4", "在线"));
         out.add(new Item("在线示例 · Sintel",
                 "https://media.w3.org/2010/05/sintel/trailer.mp4", "在线"));
-        // API 源分类
-        ApiSourceManager am = new ApiSourceManager(getContext());
-        for (ApiSourceManager.Source src : am.sources()) {
-            List<String> classes = am.homeClasses(src);
-            if (classes == null) continue;
-            for (String c : classes)
-                out.add(new Item(c + " · 分类", "", "API:" + src.name));
-        }
         addLocalVideos(out);
     }
 
@@ -301,8 +414,7 @@ public class HomeFragment extends Fragment {
             Item it = data.get(pos);
             h.title.setText(it.title);
             h.link.setText(it.link != null && !it.link.isEmpty() ? it.link : "由 API 源解析");
-            h.link.setVisibility(it.link != null && !it.link.isEmpty()
-                    ? View.VISIBLE : View.GONE);
+            h.link.setVisibility(it.link != null && !it.link.isEmpty() ? View.VISIBLE : View.GONE);
             h.type.setText(it.type);
             h.itemView.setOnClickListener(v -> openUrl(getContext(), it.link, it.title));
         }
