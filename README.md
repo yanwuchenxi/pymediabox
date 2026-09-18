@@ -12,8 +12,12 @@ Android 影音播放器，参照 **TVBoxOS-Mobile** 与 **Chaquopy** 项目设�
   等依赖的路线。
 
 ## 功能
-- **影音播放**：系统 `VideoView`（在线 / 本地 / 分享 三入口），本地媒体
-  目录扫描 + 权限申请。
+- **影音播放**：系统 `VideoView`（在线 / 本地 / 分享 / 下一个 入口），本地媒体
+  目录扫描 + 权限申请；播放页带进度条拖动、重播、全屏、收藏、下一个。
+- **断点续播**：`ResumeManager` 按 URL 记忆播放进度（设置可开关），
+  重播 / 播完自动清除。
+- **API 源管理**：`ApiSourceManager` TVBox 式 JSON 源（内置演示源 + 用户
+  自定义增删），首页下拉分类来自 API 源。
 - **Python 支持**：Chaquopy 15.0.1 + Python 3.10；`spider.py` 以
   `home_content`/`category_content`/`search_content`/`detail_content`/
   `player_content` 方法返回 JSON（TVBox Spider 接口的 Python 版），
