@@ -158,6 +158,38 @@ def page_home():
         cx += 132
     y += 150 + 16
 
+    # 蜂蜜式分类瀑布流：源选择 + 分类标签
+    # 源选择按钮行
+    sw = text_w("源：内置演示源", f_btn) + 40
+    rrect(d, (40, y, 40 + sw, y + 52), 12, ACCENT)
+    d.text((60, y + 14), "源：内置演示源", font=f_btn, fill=BLACK)
+    d.text((40 + sw + 16, y + 18), "蜂蜜影视 · 分类瀑布流", font=f_small, fill=SECONDARY)
+    y += 52 + 14
+
+    # 分类标签横排
+    cls = ["电影", "剧集", "综艺", "动漫", "短片"]
+    cx = 40
+    for i, c in enumerate(cls):
+        cw = text_w(c, f_chip) + 40
+        sel = (i == 0)
+        if sel:
+            rrect(d, (cx, y, cx + cw, y + 48), 24, ACCENT)
+            d.text((cx + 20, y + 12), c, font=f_chip, fill=BLACK)
+        else:
+            rrect(d, (cx, y, cx + cw, y + 48), 24, CARD, outline=CARD2, width=2)
+            d.text((cx + 20, y + 12), c, font=f_chip, fill=SECONDARY)
+        cx += cw + 10
+    y += 48 + 16
+    # 分类下视频列表（示例 4 条）
+    vids = ["电影 · 示例片 1", "电影 · 示例片 2", "电影 · 示例片 3", "电影 · 示例片 4"]
+    for vt in vids:
+        chh = 96
+        card(d, 40, y, W - 80, chh)
+        d.text((70, y + 24), vt, font=f_card_s, fill=WHITE)
+        d.text((70, y + 62), "· 电影", font=f_small, fill=SECONDARY)
+        y += chh + 12
+    y += 8
+
     # 搜索栏
     rrect(d, (40, y, W - 40, y + 64), 16, CARD, outline=CARD2, width=2)
     icon_search(d, 80, y + 32, r=18, color=SECONDARY)
@@ -234,6 +266,7 @@ def page_settings():
     btn(d, 70, yy, W - 140, "＋ 添加 API 源", h=56)
     yy += 56 + 16
     srcs = [("内置演示源", "pymediabox://builtin", "内置", True),
+            ("蜂蜜源", "https://fengmi.example/vod", "自定义", False),
             ("API 源", "https://api.example.com/vod", "自定义", False)]
     for name, url, badge, builtin in srcs:
         ch = 88
