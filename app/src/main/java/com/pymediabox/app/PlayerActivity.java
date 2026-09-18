@@ -3,25 +3,19 @@ package com.pymediabox.app;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.widget.MediaController;
-import android.widget.SurfaceView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaSource;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.extractors.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.MediaItem;
-import com.google.android.exoplayer2.ui.PlayerControlView;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.ui.PlayerView;
 
 public class PlayerActivity extends AppCompatActivity {
 
     private ExoPlayer exoPlayer;
     private PlayerView playerView;
-    private PowerManager.WakeLock wakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +50,7 @@ public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (exoPlayer != null) exoPlayer.release();
-        exoPlayer = null;
+        if (exoPlayer != null) { exoPlayer.release(); exoPlayer = null; }
         super.onDestroy();
     }
 }
