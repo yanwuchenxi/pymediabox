@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.bnav_fav),
                 findViewById(R.id.bnav_settings),
         };
-        navs[0].setOnClickListener(v -> { tabLayout.selectTab(0); });
+        navs[0].setOnClickListener(v -> { tabLayout.getTabAt(0).select(); });
         navs[1].setOnClickListener(v -> {
             Intent i = new Intent(this, PlayerActivity.class);
             i.putExtra("url", "https://example.com?q=");
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(i);
         });
         navs[2].setOnClickListener(v -> selectTab(0)); // 历史/收藏 在首页分段区
-        navs[3].setOnClickListener(v -> tabLayout.selectTab(1));
+        navs[3].setOnClickListener(v -> tabLayout.getTabAt(1).select());
 
         selectTab(0);
         syncBottomNav();
