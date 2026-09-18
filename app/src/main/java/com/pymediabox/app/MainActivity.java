@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     private void runPythonSpider() {
         Python py = Python.getInterpreter();
         try {
+            // chaquopy 将 src/main/python/ 下的 .py 文件作为可导入模块
             PyModule mod = py.importModule("spider", 0);
             PyObject createSpider = mod.callattr("create_spider");
             PyObject spider = createSpider.call();
