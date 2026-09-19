@@ -214,13 +214,20 @@ public class HomeFragment extends Fragment {
             h.coverChar.setText(it.title.isEmpty() ? "影" : it.title.substring(0, 1));
             h.duration.setText(it.duration.isEmpty() ? it.tag : it.duration);
             h.duration.setVisibility(it.duration.isEmpty() ? View.GONE : View.VISIBLE);
+            // 新/热 状态角标（演示：前 2 条标"新"）
+            if (pos < 2) {
+                h.status.setText("新");
+                h.status.setVisibility(View.VISIBLE);
+            } else {
+                h.status.setVisibility(View.GONE);
+            }
             h.itemView.setOnClickListener(v -> openUrl(getContext(), it.link, it.title));
         }
 
         @Override public int getItemCount() { return data.size(); }
 
         class VH extends RecyclerView.ViewHolder {
-            TextView title, link, tag, coverChar, duration;
+            TextView title, link, tag, coverChar, duration, status;
             VH(View v) {
                 super(v);
                 title = v.findViewById(R.id.tv_item_title);
@@ -228,6 +235,7 @@ public class HomeFragment extends Fragment {
                 tag = v.findViewById(R.id.tv_item_type);
                 coverChar = v.findViewById(R.id.tv_cover_char);
                 duration = v.findViewById(R.id.tv_duration);
+                status = v.findViewById(R.id.tv_status);
             }
         }
     }
