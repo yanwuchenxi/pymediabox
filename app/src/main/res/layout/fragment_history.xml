@@ -15,16 +15,15 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- 搜索框（对齐截图"搜索历史记录"） -->
+    <!-- 搜索历史记录框（对齐截图） -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_search_hist"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="44dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
-        android:gravity="start|center_vertical"
-        android:paddingStart="20dp"
+        android:layout_marginBottom="14dp"
+        android:gravity="center"
         android:text="搜索历史记录"
         android:backgroundTint="@color/card_bg"
         android:textColor="@color/text_secondary"
@@ -42,7 +41,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_tab_hist"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="38dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:text="观看历史"
@@ -52,7 +51,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_tab_fav"
             android:layout_width="0dp"
-            android:layout_height="40dp"
+            android:layout_height="38dp"
             android:layout_weight="1"
             android:layout_marginStart="4dp"
             android:text="影视收藏"
@@ -60,17 +59,7 @@
             android:textColor="@color/white" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_hist_empty"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="32dp"
-        android:gravity="center"
-        android:text="没有更多数据"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp"
-        android:visibility="gone" />
-
+    <!-- 双列网格 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_hist"
         android:layout_width="match_parent"
@@ -78,4 +67,15 @@
         android:layout_weight="1"
         android:clipToPadding="false"
         android:padding="8dp" />
+
+    <TextView
+        android:id="@+id/tv_hist_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="28dp"
+        android:gravity="center"
+        android:text="没有更多数据"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:visibility="gone" />
 </LinearLayout>

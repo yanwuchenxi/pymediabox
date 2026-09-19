@@ -39,7 +39,7 @@ public class HistoryFragment extends Fragment {
     @Override public void onViewCreated(@NonNull View v, @Nullable Bundle s) {
         history = new HistoryManager(getContext());
         recycler = v.findViewById(R.id.recycler_hist);
-        recycler.setLayoutManager(new LinearLayoutManager(getContext()));
+        recycler.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(getContext(), 2));
 
         btnTabHistory = v.findViewById(R.id.btn_tab_hist);
         btnTabFav = v.findViewById(R.id.btn_tab_fav);
