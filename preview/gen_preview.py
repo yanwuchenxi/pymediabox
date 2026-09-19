@@ -9,13 +9,13 @@ FONT_REG = os.path.join(BASE, "fonts", "NotoSansSC-Regular.otf")
 OUT = os.path.join(BASE, "out")
 os.makedirs(OUT, exist_ok=True)
 
-BLACK    = (13, 15, 26)
-CARD     = (30, 33, 48)
-CARD2    = (37, 42, 58)
-ACCENT   = (76, 201, 240)
-ACCENT_D = (46, 139, 168)
+BLACK    = (12, 18, 32)
+CARD     = (21, 32, 58)
+CARD2    = (30, 44, 74)
+ACCENT   = (201, 168, 106)
+ACCENT_D = (138, 114, 69)
 WHITE    = (255, 255, 255)
-SECOND   = (138, 143, 168)
+SECOND   = (138, 147, 168)
 DANGER   = (255, 107, 107)
 NAV_BG   = (242, 20, 31, 31)
 
@@ -116,8 +116,11 @@ def page_home():
     d.text((40, hy+40), "推荐精选", font=f_xs, fill=ACCENT)
     d.text((40, hy+72), "今日焦点 · 在线示例影片", font=f_hero1, fill=WHITE)
     d.text((40, hy+140), "Big Buck Bunny · 10MB · H.264", font=f_xs, fill=SECOND)
-    d.rectangle((W-120, hy+hh-50, W-50, hy+hh-14), fill=CARD)
-    d.text((W-108, hy+hh-44), "1/3", font=f_xs, fill=WHITE)
+    rrect(d, (W-120, hy+hh-50, W-40, hy+hh-10), 8, CARD)
+    for k in range(3):
+        px = W-110 + k*16
+        col = ACCENT if k==0 else SECOND
+        d.ellipse((px, hy+hh-40, px+8, hy+hh-32), fill=col)
     y = hy + hh + 16
 
     # ② 分类标签横排
@@ -165,27 +168,7 @@ def page_home():
         d.text((gx+12+10, gy+268), tag, font=f_xs, fill=BLACK)
     y = y + 2*row_h + 2*12 + 16
 
-    # ⑤ 历史/收藏分段
-    hw = (W-40-12)//2
-    rrect(d, (16, y, 16+hw, y+56), 12, ACCENT)
-    d.text((16+hw//2 - tw("观看历史",f_card)//2, y+14), "观看历史", font=f_card, fill=BLACK)
-    rrect(d, (16+hw+12, y, 16+hw+12+hw, y+56), 12, CARD, outline=CARD2, width=2)
-    d.text((16+hw+12+hw//2 - tw("影视收藏",f_card)//2, y+14), "影视收藏", font=f_card, fill=WHITE)
-    y += 56 + 16
-
-    # ⑥ 历史卡片横排（示意 3 张）
-    for i in range(3):
-        cw2 = 200
-        gx = 16 + i*(cw2+12)
-        rrect(d, (gx, y, gx+cw2, y+150), 12, CARD)
-        rrect(d, (gx, y, gx+cw2, y+90), 12, CARD2)
-        d.rectangle((gx, y+80, gx+cw2, y+90), fill=CARD2)
-        d.text((gx+cw2//2-10, y+30), "影", font=f_card, fill=ACCENT)
-        d.text((gx+10, y+102), "Big Buck Bunny", font=f_xs, fill=WHITE)
-        d.text((gx+10, y+124), "在线 · 09-18 21:50", font=f_xs, fill=SECOND)
-    y += 150 + 20
-
-    # ⑦ 快捷入口
+        # ⑤ 快捷入口
     kw = (W-40-12)//2
     rrect(d, (16, y, 16+kw, y+64), 12, CARD, outline=CARD2, width=2)
     d.text((16+kw//2 - tw("本地媒体",f_card)//2, y+18), "本地媒体", font=f_card, fill=WHITE)
