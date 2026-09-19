@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.button.MaterialButton;
+import android.widget.ImageView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -56,9 +57,12 @@ public class HomeFragment extends Fragment {
     private List<HistoryManager.HistoryItem> historyItems = new ArrayList<>();
 
     static class Video {
-        String title, link, tag, duration;
+        String title, link, tag, duration, poster;
         Video(String t, String l, String tag, String dur) {
-            title = t; link = l; this.tag = tag; duration = dur;
+            title = t; link = l; this.tag = tag; duration = dur; poster = "";
+        }
+        Video(String t, String l, String tag, String dur, String poster) {
+            this(t, l, tag, dur); this.poster = poster;
         }
     }
 
@@ -134,16 +138,20 @@ public class HomeFragment extends Fragment {
         if (list.isEmpty()) {
             list.add(new Video("Big Buck Bunny",
                     "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_10mb.mp4",
-                    "在线", "10MB"));
+                    "在线", "10MB",
+                    "https://peach.blender.org/wp-content/uploads/big-buck-bunny-poster.jpg"));
             list.add(new Video("Sintel",
                     "https://media.w3.org/2010/05/sintel/trailer.mp4",
-                    "在线", "52MB"));
+                    "在线", "52MB",
+                    "https://media.w3.org/2010/05/sintel/poster.png"));
             list.add(new Video("Tears of Steel",
                     "https://media.w3.org/2010/05/tearsofsteel/tearsofsteel_720p.mp4",
-                    "在线", "108MB"));
+                    "在线", "108MB",
+                    "https://media.w3.org/2010/05/tearsofsteel/poster.png"));
             list.add(new Video("Elephants Dream",
                     "https://media.w3.org/2010/05/bunny/elephants_dream_720p.mp4",
-                    "在线", "151MB"));
+                    "在线", "151MB",
+                    "https://media.w3.org/2010/05/bunny/poster.png"));
         }
         if (videoAdapter == null) {
             videoAdapter = new VideoAdapter(list);
@@ -211,7 +219,18 @@ public class HomeFragment extends Fragment {
             h.link.setVisibility(it.link != null && !it.link.isEmpty()
                     ? View.VISIBLE : View.GONE);
             h.tag.setText(it.tag);
-            h.coverChar.setText(it.title.isEmpty() ? "影" : it.title.substring(0, 1));
+            // Glide 加载海报（有则显示，否则显示首字占位）
+            if (it.poster != null && !it.poster.isEmpty()) {
+                com.bumptech.glide.Glide.with(v.getContext())
+                        .load(it.poster)
+                        .centerCrop()
+                        .into(h.cover);
+                h.coverChar.setVisibility(View.GONE);
+            } else {
+                h.cover.setVisibility(View.GONE);
+                h.coverChar.setText(it.title.isEmpty() ? "影" : it.title.substring(0, 1));
+                h.coverChar.setVisibility(View.VISIBLE);
+            }
             h.duration.setText(it.duration.isEmpty() ? it.tag : it.duration);
             h.duration.setVisibility(it.duration.isEmpty() ? View.GONE : View.VISIBLE);
             // 新/热 状态角标（演示：前 2 条标"新"）
@@ -228,6 +247,7 @@ public class HomeFragment extends Fragment {
 
         class VH extends RecyclerView.ViewHolder {
             TextView title, link, tag, coverChar, duration, status;
+            ImageView cover;
             VH(View v) {
                 super(v);
                 title = v.findViewById(R.id.tv_item_title);
@@ -236,6 +256,7 @@ public class HomeFragment extends Fragment {
                 coverChar = v.findViewById(R.id.tv_cover_char);
                 duration = v.findViewById(R.id.tv_duration);
                 status = v.findViewById(R.id.tv_status);
+                cover = v.findViewById(R.id.iv_cover);
             }
         }
     }

@@ -68,10 +68,16 @@ public class MainActivity extends AppCompatActivity {
             int n = ll.getChildCount();
             if (n < 2) continue;
             TextView label = (TextView) ll.getChildAt(n - 1);
-            int color = (i == current) ? 0xFF4CC9F0 : 0xFF8A8FA8;
+            boolean sel = (i == current);
+            int color = sel ? 0xFFC9A86A : 0xFF8A8FA8;  // 金色
             label.setTextColor(color);
             TextView icon = (TextView) ll.getChildAt(0);
             icon.setTextColor(color);
+            // 选中时图标放大
+            android.view.ViewGroup.LayoutParams lp = icon.getLayoutParams();
+            int h = sel ? 56 : 44;
+            lp.height = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_DIP, h, getResources().getDisplayMetrics());
+            icon.setLayoutParams(lp);
         }
     }
 

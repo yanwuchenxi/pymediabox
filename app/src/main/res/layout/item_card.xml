@@ -22,6 +22,13 @@
             android:layout_height="130dp"
             android:background="@color/card_bg_2">
 
+            <ImageView
+                android:id="@+id/iv_cover"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="封面" />
+
             <TextView
                 android:id="@+id/tv_cover_char"
                 android:layout_width="wrap_content"
